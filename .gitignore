@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+/outputs/
+/data/
+/assets/user/
+/build/
+/dist/
+
+# Local environments, credentials and editor state
+/.venv/
+/venv/
+/.env
+/.env.*
+!/.env.example
+/.aws/
+/.ssh/
+/.codex/
+/.agents/
+/.vscode/
+/.idea/
+.DS_Store

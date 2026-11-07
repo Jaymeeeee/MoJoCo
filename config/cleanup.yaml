@@ -1,0 +1,8 @@
+# Cleanup is deliberately restricted to disposable verification output.
+# assets/, examples/, outputs/datasets/, and other output directories are outside its fixed scope.
+schema_version: 1
+scope: outputs/_checks
+retention_days: 7
+default_mode: dry-run
+# Scheduling is installed separately; this file does not register a job.
+schedule: daily

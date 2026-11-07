@@ -1,0 +1,13 @@
+name: lerobot
+channels:
+  - conda-forge
+  - nodefaults
+variables:
+  PYTHONPATH: ""
+  PYTHONNOUSERSITE: "1"
+dependencies:
+  - python=3.12
+  - pip
+  - ffmpeg
+# Install the separately locked CPU PyTorch and LeRobot dependencies with
+# requirements-lerobot-lock.txt after creating this isolated environment.

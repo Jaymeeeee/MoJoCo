@@ -1,0 +1,10 @@
+{
+  "input_features": {
+    "observation.images.head": {"type": "VISUAL", "shape": [3, 256, 256]},
+    "observation.images.wrist": {"type": "VISUAL", "shape": [3, 256, 256]},
+    "observation.state": {"type": "STATE", "shape": [8]}
+  },
+  "output_features": {
+    "action": {"type": "ACTION", "shape": [8]}
+  }
+}

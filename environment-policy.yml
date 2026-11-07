@@ -1,0 +1,13 @@
+name: mujoco_policy
+channels:
+  - conda-forge
+  - nodefaults
+variables:
+  PYTHONPATH: ""
+  PYTHONNOUSERSITE: "1"
+dependencies:
+  - python=3.12
+  - pip
+  - ffmpeg
+# scripts/setup_policy_env.sh installs the pinned Python runtime and local
+# LeRobot fork. This environment is separate from collection and conversion.

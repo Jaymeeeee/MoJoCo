@@ -1,0 +1,234 @@
+format_version: 1
+base_config: config/insert_plug.yaml
+base_source_xy: [0.45, -0.07]
+base_target_xy: [0.45, 0.07]
+grid_spacing_m: 0.02
+max_grid_steps: 2
+selection_seed: 20261107
+episodes_per_position: 10
+recording_hz: 10
+depth_enabled: true
+required_edge_margin_px: 5.0
+positions:
+- name: pos0
+  source_xy: [0.49, -0.07]
+  target_xy: [0.41, 0.11]
+  source_steps: [2, 0]
+  target_steps: [-2, 2]
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 58.843
+    final:
+      all_inside: true
+      min_edge_margin_px: 56.574
+  physics_check:
+    success: true
+    duration_seconds: 39.4
+    control_steps: 394
+    radial_error_m: 4.655938759738923e-05
+    insertion_depth_m: 0.03000001102917105
+    unsafe_contact_count: 0
+    control_hz: 10
+    action_command_dtype: float32
+- name: pos1
+  source_xy: [0.43, -0.03]
+  target_xy: [0.49, 0.05]
+  source_steps: [-1, 2]
+  target_steps: [2, -1]
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 85.77
+    final:
+      all_inside: true
+      min_edge_margin_px: 85.77
+  physics_check:
+    success: true
+    duration_seconds: 37.9
+    control_steps: 379
+    radial_error_m: 3.4129895823566055e-05
+    insertion_depth_m: 0.030000011030666497
+    unsafe_contact_count: 0
+    control_hz: 10
+    action_command_dtype: float32
+- name: pos2
+  source_xy: [0.49, -0.05]
+  target_xy: [0.41, 0.07]
+  source_steps: [2, 1]
+  target_steps: [-2, 0]
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 81.481
+    final:
+      all_inside: true
+      min_edge_margin_px: 79.834
+  physics_check:
+    success: true
+    duration_seconds: 38.5
+    control_steps: 385
+    radial_error_m: 4.655456627132499e-05
+    insertion_depth_m: 0.030000011029181976
+    unsafe_contact_count: 0
+    control_hz: 10
+    action_command_dtype: float32
+- name: pos3
+  source_xy: [0.47, -0.05]
+  target_xy: [0.47, 0.09]
+  source_steps: [1, 1]
+  target_steps: [1, 1]
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 64.336
+    final:
+      all_inside: true
+      min_edge_margin_px: 61.921
+  physics_check:
+    success: true
+    duration_seconds: 38.3
+    control_steps: 383
+    radial_error_m: 4.7491950397734676e-05
+    insertion_depth_m: 0.030000011029068352
+    unsafe_contact_count: 0
+    control_hz: 10
+    action_command_dtype: float32
+- name: pos4
+  source_xy: [0.43, -0.09]
+  target_xy: [0.47, 0.03]
+  source_steps: [-1, -1]
+  target_steps: [1, -2]
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 66.213
+    final:
+      all_inside: true
+      min_edge_margin_px: 68.438
+  physics_check:
+    success: true
+    duration_seconds: 38.2
+    control_steps: 382
+    radial_error_m: 4.6564484393094656e-05
+    insertion_depth_m: 0.030000011029161833
+    unsafe_contact_count: 0
+    control_hz: 10
+    action_command_dtype: float32
+- name: pos5
+  source_xy: [0.45, -0.05]
+  target_xy: [0.41, 0.03]
+  source_steps: [0, 1]
+  target_steps: [-2, -2]
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 88.976
+    final:
+      all_inside: true
+      min_edge_margin_px: 90.363
+  physics_check:
+    success: true
+    duration_seconds: 38.1
+    control_steps: 381
+    radial_error_m: 4.718320208189232e-05
+    insertion_depth_m: 0.03000001102911299
+    unsafe_contact_count: 0
+    control_hz: 10
+    action_command_dtype: float32
+- name: pos6
+  source_xy: [0.41, -0.09]
+  target_xy: [0.45, 0.11]
+  source_steps: [-2, -1]
+  target_steps: [0, 2]
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 54.235
+    final:
+      all_inside: true
+      min_edge_margin_px: 51.734
+  physics_check:
+    success: true
+    duration_seconds: 39.1
+    control_steps: 391
+    radial_error_m: 4.6349481289584615e-05
+    insertion_depth_m: 0.0300000110291721
+    unsafe_contact_count: 0
+    control_hz: 10
+    action_command_dtype: float32
+- name: pos7
+  source_xy: [0.45, -0.11]
+  target_xy: [0.41, 0.05]
+  source_steps: [0, -2]
+  target_steps: [-2, -1]
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 51.694
+    final:
+      all_inside: true
+      min_edge_margin_px: 54.235
+  physics_check:
+    success: true
+    duration_seconds: 38.8
+    control_steps: 388
+    radial_error_m: 4.6278999845792274e-05
+    insertion_depth_m: 0.03000001102922035
+    unsafe_contact_count: 0
+    control_hz: 10
+    action_command_dtype: float32
+- name: pos8
+  source_xy: [0.41, -0.05]
+  target_xy: [0.45, 0.03]
+  source_steps: [-2, 1]
+  target_steps: [0, -2]
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 91.437
+    final:
+      all_inside: true
+      min_edge_margin_px: 92.638
+  physics_check:
+    success: true
+    duration_seconds: 37.7
+    control_steps: 377
+    radial_error_m: 4.587326282101269e-05
+    insertion_depth_m: 0.03000001102926938
+    unsafe_contact_count: 0
+    control_hz: 10
+    action_command_dtype: float32
+- name: pos9
+  source_xy: [0.49, -0.03]
+  target_xy: [0.47, 0.05]
+  source_steps: [2, 2]
+  target_steps: [1, -1]
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 85.77
+    final:
+      all_inside: true
+      min_edge_margin_px: 85.77
+  physics_check:
+    success: true
+    duration_seconds: 38.1
+    control_steps: 381
+    radial_error_m: 4.730395221655043e-05
+    insertion_depth_m: 0.030000011029086105
+    unsafe_contact_count: 0
+    control_hz: 10
+    action_command_dtype: float32
+rejected_candidates:
+  duplicate_position: 9
+  geometry_or_planning: 0
+  outside_view: 0
+  execution: 0
+selection_complete: true
+base_config_sha256: da969b1727744def228b21ba58da873f7eb463a8c9d052336118cf42d4105934
+visibility_method: all compiled visual mesh vertices projected into head optical camera
+occlusion_checked: false
+control_hz: 10
+action_hold_duration_s: 0.1
+action_command_dtype: float32

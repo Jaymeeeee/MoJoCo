@@ -1,0 +1,140 @@
+# All lengths in metres, angles in radians, masses in kg, and time in seconds.
+# This is a clearance-fit, straight extraction/insertion task, not a threaded screw.
+physics:
+  timestep: 0.001
+  integrator: implicitfast
+  solver: Newton
+  iterations: 100
+  tolerance: 1.0e-10
+  cone: elliptic
+  impratio: 10
+  gravity: [0.0, 0.0, -9.81]
+
+robot:
+  model_dir: assets/robots/franka_fr3
+  model_file: fr3.xml
+  base_position: [0.0, 0.0, 0.0]
+  arm_joint_names: [fr3_joint1, fr3_joint2, fr3_joint3, fr3_joint4, fr3_joint5, fr3_joint6, fr3_joint7]
+  arm_actuator_names: [fr3_joint1, fr3_joint2, fr3_joint3, fr3_joint4, fr3_joint5, fr3_joint6, fr3_joint7]
+  home_qpos: [0.0, -0.55, 0.0, -2.15, 0.0, 1.6, 0.7853981633974483]
+  # Ideal robot gravity compensation is an explicit baseline assumption.
+  gravity_compensation: true
+
+gripper:
+  type: robotiq_2f85
+  description: MuJoCo Menagerie Robotiq 2F-85 with coupled linkage and tendon actuator.
+  model_dir: assets/grippers/robotiq_2f85
+  model_file: 2f85.xml
+  opening_range: [0.0, 0.085]
+  open_width: 0.075
+  grasp_width: 0.020
+  tcp_reference_width: 0.024
+  pad_contact_position: [0.0, -0.0066, 0.028125]
+  mount_position_in_link7: [0.0, 0.0, 0.107]
+  mount_quaternion_in_link7: [1.0, 0.0, 0.0, 0.0]
+  # TCP +Z points from the flange towards the fingertips.
+
+table:
+  surface_z: 0.0
+  half_size: [0.65, 0.55, 0.025]
+  centre_xy: [0.30, 0.0]
+
+board:
+  type: stl_holders
+  collision_manifest: assets/objects/insert_plug/collision.json
+  visual_mesh: assets/放置桶.STL
+  visual_mesh_scale: [0.001, 0.001, 0.001]
+  visual_mesh_position: [-0.0125, 0.0125, -0.0000482900068164]
+  visual_mesh_quaternion: [0.707106781186548, 0.707106781186548, 0.0, 0.0]
+  centre_xy: [0.45, 0.0]
+  half_size_xy: [0.10, 0.14]
+  bottom_z: 0.0
+  bottom_thickness: 0.005
+  wall_height: 0.035
+  # Actual STL: rim z=0.040, cavity floor z=0.005. Bolt head rests on rim.
+  hole_radius: 0.0055
+  hole_segments: 64
+  socket_half_width: 0.018
+  # Task placement: orange/source and green/target. Edit ONLY these two XY
+  # positions to relocate the holders; the planner resolves their scene sites.
+  source_xy: [0.45, -0.07]
+  target_xy: [0.45, 0.07]
+  friction: [0.25, 0.001, 0.0001]
+
+peg:
+  type: stl_bolt
+  collision_manifest: assets/objects/insert_plug/collision.json
+  # The body origin and peg_tip site are at the shaft's lower end.
+  shaft_radius: 0.005
+  shaft_length: 0.030
+  head_radius: 0.013856406211853
+  head_height: 0.0075
+  mass: 0.006
+  initial_floor_clearance: 0.0002
+  friction: [0.6, 0.005, 0.0001]
+  # Original STL is in mm with shaft along +Y; transformed to SI and +Z.
+  # The exact hex head and convex rounded shaft have separate colliders.
+  visual_mesh: assets/螺栓.STL
+  visual_mesh_scale: [0.001, 0.001, 0.001]
+  visual_mesh_position: [-0.013856406211853, 0.012, 0.0]
+  visual_mesh_quaternion: [0.707106781186548, 0.707106781186548, 0.0, 0.0]
+
+cameras:
+  # Observation name: observation.images.head. Physical scene camera stays third_person.
+  third_person:
+    # Across the two holders from the Franka base, looking back along -X.
+    position: [0.90, 0.0, 0.30]
+    look_at: [0.45, 0.0, 0.045]
+    fovy: 44.0
+  wrist:
+    # In the gripper mount frame; looks along +Z towards the TCP/board.
+    position: [0.0, -0.075, 0.050]
+    look_at: [0.0, 0.0, 0.320]
+    fovy: 70.0
+  width: 256
+  height: 256
+  depth:
+    enabled: true
+    # Registered to RGB, float32 metres along optical +Z; far plane is background.
+
+recording:
+  # One observation/action and video frame for every 100 ms expert command.
+  sample_hz: 10
+
+task:
+  # Robotiq closes along TCP X; rotate to grasp the STL head's world-Y flats.
+  grasp_yaw: 1.5707963267948966
+  source_site: source_hole
+  target_site: target_hole
+  tcp_site: tcp
+  peg_head_site: peg_head
+  peg_tip_site: peg_tip
+  control_hz: 10
+  approach_height: 0.08
+  transport_height: 0.16
+  insertion_duration: 3.0
+  # Slow extraction keeps compliant-pad drift small with 100 ms held targets.
+  extraction_duration: 12.5
+  # Ten 100 ms opening commands keep the gravity-driven seating gentle.
+  release_duration: 1.0
+  seating_tolerance: 0.002
+  settling_seconds: 0.5
+  planning:
+    max_joint_velocity: 0.8
+    max_joint_acceleration: 2.0
+    max_cartesian_velocity: 0.12
+    max_cartesian_acceleration: 0.6
+    collision_joint_step: 0.015
+    collision_cartesian_step: 0.001
+    contact_tolerance: 0.00015
+    fixture_penetration_tolerance: 0.00005
+    tracking_position_tolerance: 0.00005
+    tracking_rotation_tolerance: 0.0005
+    tracking_joint_speed_tolerance: 0.01
+    tracking_timeout: 2.0
+    grasp_settle_seconds: 0.8
+    alignment_margin: 0.00015
+    maximum_held_tilt: 0.003
+    insertion_depth: 0.006
+    preinsert_clearance: 0.015
+    retract_height: 0.08

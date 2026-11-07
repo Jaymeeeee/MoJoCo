@@ -1,0 +1,12 @@
+name: mujoco
+variables:
+  PYTHONPATH: ""
+  PYTHONNOUSERSITE: "1"
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - -e .[dev]

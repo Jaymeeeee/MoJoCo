@@ -1,0 +1,13 @@
+# Paths are resolved relative to the MuJoCo workspace root.
+checkpoint: outputs/train/act_insert_plug_20261107_2044/artifacts/checkpoints/030000
+scene_config: config/insert_plug.yaml
+positions_config: config/insert_plug_positions.yaml
+# 0..9 selects a collected layout; 'all' evaluates all ten; 'config' uses scene YAML positions.
+position: 0
+device: auto
+# Keep the checkpoint's trained chunk_size; execute this many actions before predicting again.
+# 50 actions = 5 seconds before replanning; each action still lasts 100 ms.
+# Requested comparison against the previous 10-action execution window.
+n_action_steps: 50
+# Simulated seconds. Physics/control remain 1 kHz / 10 Hz.
+duration: 60.0
