@@ -70,6 +70,10 @@ def parse_args(argv=None):
     parser.add_argument('--device', choices=('cuda', 'cpu', 'auto'), default='cuda')
     parser.add_argument('--n-action-steps', type=int, help='Default: policy YAML value')
     parser.add_argument('--duration', type=float, help='Default: policy YAML value')
+    parser.add_argument('--stop-on-contact', action=argparse.BooleanOptionalAction, default=None,
+                        help='Opt in to stopping at a diagnostic contact violation')
+    parser.add_argument('--contact-diagnostics', action=argparse.BooleanOptionalAction, default=None,
+                        help='Opt in to contact diagnostics without changing task success')
     args = parser.parse_args(argv)
     if args.workers < 1:
         parser.error('--workers must be positive')
@@ -81,7 +85,7 @@ def prepare(args):
     policy_path = workspace_path(args.policy_config)
     policy = yaml.safe_load(policy_path.read_text(encoding='utf-8'))
     allowed = {'checkpoint', 'scene_config', 'positions_config', 'device',
-               'n_action_steps', 'duration', 'position'}
+               'n_action_steps', 'duration', 'position', 'stop_on_contact', 'contact_diagnostics'}
     if not isinstance(policy, dict) or set(policy) - allowed:
         raise ValueError(f'Invalid policy configuration: {policy_path}')
     requested = workspace_path(args.checkpoint or policy['checkpoint'])
@@ -98,6 +102,14 @@ def prepare(args):
     duration = args.duration if args.duration is not None else policy.get('duration', 60.)
     horizon = (args.n_action_steps if args.n_action_steps is not None else
                policy.get('n_action_steps', 10))
+    stop_on_contact = (args.stop_on_contact if args.stop_on_contact is not None else
+                       policy.get('stop_on_contact', False))
+    contact_diagnostics = (args.contact_diagnostics if args.contact_diagnostics is not None else
+                           policy.get('contact_diagnostics', False))
+    if type(stop_on_contact) is not bool or type(contact_diagnostics) is not bool:
+        raise ValueError('stop_on_contact and contact_diagnostics must be booleans')
+    contact_diagnostics = contact_diagnostics or stop_on_contact
+    contact_policy = 'stop' if stop_on_contact else 'diagnostic' if contact_diagnostics else 'off'
     saved = json.loads((checkpoint / 'config.json').read_text(encoding='utf-8'))
     if saved.get('type') != 'act' or type(horizon) is not int or not 1 <= horizon <= saved['chunk_size']:
         raise ValueError('An ACT checkpoint and n_action_steps within its chunk_size are required')
@@ -128,7 +140,8 @@ def prepare(args):
         n_action_steps=horizon, duration=duration, duration_s=duration,
         episodes_per_position=EPISODES, episodes_requested=100,
         control_hz=10, physics_hz=1000, video=True, viewer=False,
-        stop_on_contact=True, randomization=False, environment=ENVIRONMENT,
+        stop_on_contact=stop_on_contact, contact_diagnostics=contact_diagnostics,
+        contact_policy=contact_policy, randomization=False, environment=ENVIRONMENT,
         unset_environment=['PYTHONPATH'],
         positions=[dict(name=row['name'], source_xy=row['source_xy'], target_xy=row['target_xy'],
                         seed_start=i * EPISODES, seeds=list(range(i * EPISODES, (i + 1) * EPISODES)))
@@ -159,6 +172,8 @@ def command_for(configuration, index):
             '--backend', configuration['backend'], '--device', configuration['device'],
             '--n-action-steps', str(configuration['n_action_steps']),
             '--duration', str(configuration['duration']),
+            '--stop-on-contact' if configuration['stop_on_contact'] else '--no-stop-on-contact',
+            '--contact-diagnostics' if configuration['contact_diagnostics'] else '--no-contact-diagnostics',
             '--output', str(output / f'pos{index}'), '--quiet']
 
 
@@ -182,10 +197,20 @@ def validate_position(configuration, index):
         report = json.loads((folder / 'result.json').read_text(encoding='utf-8'))
         expected = dict(episode_index=repeat, repetition=repeat, position=f'pos{index}',
                         seed=index * EPISODES + repeat, requested_duration_s=configuration['duration'],
-                        stop_on_contact=True, control_hz=10, action_hold_s=.1, physics_timestep_s=.001,
+                        stop_on_contact=configuration['stop_on_contact'],
+                        contact_diagnostics=configuration['contact_diagnostics'],
+                        contact_policy=configuration['contact_policy'],
+                        control_hz=10, action_hold_s=.1, physics_timestep_s=.001,
                         scene='scene.xml', video='rollout.mp4')
         if any(report.get(key) != value for key, value in expected.items()) or report.get('config') != expected_scene:
             raise ValueError(f'Report settings differ: {folder}')
+        contacts = report.get('contacts', {})
+        if contacts.get('enabled') is not configuration['contact_diagnostics']:
+            raise ValueError(f'Contact diagnostic mode differs: {folder}')
+        if not configuration['contact_diagnostics'] and (
+                report.get('contact_clean') is not None or contacts.get('unsafe_contact_count') is not None
+                or contacts.get('checks') != 0 or report.get('contact_checks') != 0):
+            raise ValueError(f'Disabled contact diagnostics must remain unmeasured: {folder}')
         policy = report.get('policy', {})
         if (policy.get('checkpoint') != configuration['checkpoint'] or
                 policy.get('n_action_steps') != configuration['n_action_steps'] or

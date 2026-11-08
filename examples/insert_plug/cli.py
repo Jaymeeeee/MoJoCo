@@ -132,7 +132,8 @@ def collect(args):
                 metadata = dict(seed=seed, config=episode_cfg, task='insert_plug',
                     model_sha256=hashlib.sha256(Path(scene_path).read_bytes()).hexdigest(),
                     model_path=scene_path.name, mujoco_version=mujoco.__version__, renderer_backend=backend,
-                    expert='Collision-checked quintic Cartesian plans with measured-grasp suffix and execution gates',
+                    expert='Smooth Cartesian plans with measured-grasp suffix and adaptive execution gates',
+                    strict_collision_checks=bool(episode_cfg['task'].get('planning', {}).get('strict_collision_checks', False)),
                     robot_gravity_compensation=episode_cfg['robot']['gravity_compensation'],
                     geometry_status=('user STL visuals and decomposed collisions; SI scale inferred from mm; '
                                      'mass and friction are configurable assumptions'
@@ -229,7 +230,7 @@ def rollout_policy(args):
         policy_config = ROOT / policy_config
     settings = yaml.safe_load(policy_config.read_text(encoding='utf-8')) or {}
     allowed = {'checkpoint', 'scene_config', 'positions_config', 'device',
-               'n_action_steps', 'duration', 'position'}
+               'n_action_steps', 'duration', 'position', 'stop_on_contact', 'contact_diagnostics'}
     if not isinstance(settings, dict) or set(settings) - allowed:
         raise ValueError(f'Invalid policy configuration in {policy_config}; allowed keys: {sorted(allowed)}')
 
@@ -259,7 +260,8 @@ def rollout_policy(args):
         duration=choose('duration', 60.), device=choose('device', 'auto'),
         n_action_steps=choose('n_action_steps', 1), viewer=args.viewer,
         realtime=args.realtime, video=args.video,
-        stop_on_contact=not args.continue_on_contact, quiet=args.quiet,
+        stop_on_contact=False if args.continue_on_contact else choose('stop_on_contact', False),
+        contact_diagnostics=choose('contact_diagnostics', False), quiet=args.quiet,
     )
     _print(dict(backend=backend, **result))
     return 0 if result['success'] else 2
@@ -286,8 +288,13 @@ def main(argv=None):
     rollout.add_argument('--realtime', action='store_true', help='Pace simulation to wall time when compute permits')
     rollout.add_argument('--video', action=argparse.BooleanOptionalAction, default=True,
                          help='Save a side-by-side head/wrist MP4 (default: enabled)')
-    rollout.add_argument('--continue-on-contact', action='store_true',
-                         help='Diagnostic mode: continue after unsafe contact, but keep episode unsuccessful')
+    rollout.add_argument('--contact-diagnostics', action=argparse.BooleanOptionalAction, default=None,
+                         help='Optionally classify contacts; diagnostic counts do not reject task success')
+    contact_stop = rollout.add_mutually_exclusive_group()
+    contact_stop.add_argument('--stop-on-contact', action=argparse.BooleanOptionalAction, default=None,
+                              help='Opt-in strict diagnostics: stop on a classified contact violation')
+    contact_stop.add_argument('--continue-on-contact', action='store_true',
+                              help='Compatibility alias to disable strict contact stopping (already the default)')
     rollout.add_argument('--quiet', action='store_true')
     plan = sub.add_parser('plan', help='Validate and save the complete nominal trajectory without executing it')
     plan.add_argument('--config', default=None)

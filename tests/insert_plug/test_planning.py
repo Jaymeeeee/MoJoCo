@@ -17,6 +17,7 @@ from examples.insert_plug.simulation import Simulation
 @pytest.fixture(scope='module')
 def planning_scene(tmp_path_factory):
     config = load_config()
+    config['task']['planning']['strict_collision_checks'] = True
     path = build_scene(config, tmp_path_factory.mktemp('planning-scene') / 'scene.xml')
     return path, config
 
@@ -50,7 +51,10 @@ def _assert_lift_then_transport(plan, source, target):
     np.testing.assert_allclose(extraction[:, :2], np.broadcast_to(source[:2], extraction[:, :2].shape), atol=1e-8)
     assert np.all(np.diff(extraction[:, 2]) >= -1e-10)
     assert np.ptp(extraction[:, 2]) > 0.05
-    np.testing.assert_allclose(transfer[:, 2], extraction[-1, 2], atol=1e-10)
+    # Continuous placement bends above transport height to enter the target
+    # waypoint with downward speed. It need not be a constant-Z line.
+    assert np.min(transfer[:, 2]) >= extraction[-1, 2]-1e-10
+    assert transfer[-1, 2] == pytest.approx(extraction[-1, 2], abs=1e-10)
     np.testing.assert_allclose(transfer[-1, :2], target[:2], atol=1e-8)
     # The held tip, rather than just the TCP, has to clear both rims.
     local_tip = np.asarray(plan.validation['held_tip_in_tcp'])
@@ -87,6 +91,9 @@ def test_complete_plan_does_not_step_or_mutate_live_physics(sim, monkeypatch, tm
     assert np.all(plan.arm_qpos >= limits[:, 0]) and np.all(plan.arm_qpos <= limits[:, 1])
     velocity = np.diff(np.vstack((plan.initial_arm_qpos, plan.arm_qpos)), axis=0) / sim.dt
     assert np.all(np.max(abs(velocity), axis=0) <= np.asarray(plan.validation['joint_velocity_limits_rad_s']) * 1.0001)
+    # Whole-plan differences include both sides of each flowing stage join.
+    acceleration = np.diff(np.vstack((np.zeros(7), velocity, np.zeros(7))), axis=0) / sim.dt
+    assert np.all(np.max(abs(acceleration), axis=0) <= np.asarray(plan.validation['joint_acceleration_limits_rad_s2']) * 1.0001)
     paths = plan.save(tmp_path)
     with open(paths['json'], encoding='utf8') as stream:
         metadata = json.load(stream)
@@ -131,6 +138,7 @@ def test_unreachable_robot_base_rejected_without_execution(tmp_path):
 
 def test_obstacle_in_transport_corridor_is_rejected_before_execution(tmp_path):
     config = load_config()
+    config['task']['planning']['strict_collision_checks'] = True
     path = build_scene(config, tmp_path / 'obstructed.xml')
     tree = ET.parse(path)
     ET.SubElement(tree.getroot().find('worldbody'), 'geom',
@@ -229,10 +237,9 @@ def test_changed_diagonal_layout_refreshes_grasp_alignment_before_insertion(tmp_
         result = ObservedExpert(simulation, verbose=False).run()
         assert result['success'], result
         assert result['metrics']['stable_for_final_250ms']
-        assert result['execution_checks']['unsafe_contact_count'] == 0
-        assert result['execution_checks']['checks'] == result['steps'] * simulation.substeps
-        assert result['execution_checks']['peak_robot_fixture_penetration_m'] == 0
-        assert result['execution_checks']['peak_shaft_fixture_penetration_m'] < 5e-5
+        assert result['execution_checks']['collision_checks_enabled'] is False
+        assert result['execution_checks']['unsafe_contact_count'] is None
+        assert result['execution_checks']['checks'] == 0
         assert not simulation.gripper_contacts()
     finally:
         simulation.close()
@@ -252,6 +259,23 @@ def test_changed_diagonal_layout_refreshes_grasp_alignment_before_insertion(tmp_
         assert plan.stages[0]['phase'] == 'align'
         assert not {'grasp', 'extract', 'transfer'}.intersection(plan.phase)
 
+        # A flowing replan measures the object in the actual hand but starts
+        # commands at the last target, avoiding a jump back by servo lag.
+        actual_rotation = probe.data.site_xmat[probe.tcp_id].reshape(3, 3)
+        actual_held_tip = actual_rotation.T @ (probe.site('peg_tip')-probe.site('tcp'))
+        target_data = mujoco.MjData(probe.model)
+        target_data.qpos[:] = probe.data.qpos
+        target_data.qpos[probe.arm_qadr] = last_target
+        mujoco.mj_kinematics(probe.model, target_data)
+        flowing = TaskPlanner(probe).plan(start_phase='align', continue_from_target=True,
+                                         initial_velocity=[0., 0., -.006])
+        np.testing.assert_array_equal(_physics_state(probe), before)
+        np.testing.assert_array_equal(probe.last_target, last_target)
+        np.testing.assert_array_equal(flowing.initial_arm_qpos, last_target)
+        np.testing.assert_allclose(flowing.stages[0]['start_position'], target_data.site_xpos[probe.tcp_id], atol=1e-12)
+        np.testing.assert_allclose(flowing.validation['held_tip_in_tcp'], actual_held_tip, atol=1e-12)
+        np.testing.assert_allclose(flowing.stages[0]['start_velocity'], [0., 0., -.006], atol=0)
+
         state, last_target = snapshots['insertion_check']
         mujoco.mj_setState(probe.model, probe.data, state, mujoco.mjtState.mjSTATE_INTEGRATION)
         probe.last_target = last_target.copy()
@@ -264,3 +288,69 @@ def test_changed_diagonal_layout_refreshes_grasp_alignment_before_insertion(tmp_
         np.testing.assert_array_equal(_physics_state(probe), before)
     finally:
         probe.close()
+
+
+def test_default_expert_keeps_contacts_in_physics_without_threshold_abort(tmp_path, monkeypatch):
+    from examples.insert_plug import expert as module
+
+    config = load_config()
+    assert config['task']['planning']['strict_collision_checks'] is False
+    path = build_scene(config, tmp_path / 'normal_contacts.xml')
+    simulation = Simulation(path, config, render=False)
+    try:
+        def forbidden_guard(*args, **kwargs):
+            pytest.fail('Default collection must not construct a threshold collision guard')
+
+        monkeypatch.setattr(module, 'MotionGuard', forbidden_guard)
+        expert = module.Expert(simulation, verbose=False)
+        plan = expert.prepare()
+        assert expert.guard is None
+        assert plan.validation['collision_checks_enabled'] is False
+        assert plan.validation['collision_samples'] == 0
+        # Fixtures remain fixed to world and real contact shapes stay enabled.
+        for name in ('source_socket', 'target_socket'):
+            body = simulation.model.body(name).id
+            assert simulation.model.body_dofnum[body] == 0
+            assert simulation.model.body_weldid[body] == 0
+        assert np.any(simulation.model.geom_contype != 0)
+        assert np.any(simulation.model.geom_conaffinity != 0)
+    finally:
+        simulation.close()
+
+
+def test_continuous_hover_plan_crosses_waypoints_and_respects_global_bounds(tmp_path):
+    config = load_config()
+    options = config['task']['planning']
+    assert options['continuous_hover']
+    path = build_scene(config, tmp_path/'flowing.xml')
+    simulation = Simulation(path, config, render=False)
+    try:
+        before = _physics_state(simulation)
+        plan = TaskPlanner(simulation).plan()
+        np.testing.assert_array_equal(_physics_state(simulation), before)
+        _assert_lift_then_transport(plan, simulation.site('source_hole'), simulation.site('target_hole'))
+        phases = {stage['phase']: stage for stage in plan.stages}
+        assert phases['extract']['end_position'][2] == pytest.approx(.10, abs=1e-12)
+        for phase, speed in [('approach', options['grasp_approach_speed']),
+                             ('transfer', options['place_approach_speed']),
+                             ('align', options['place_approach_speed'])]:
+            stage = phases[phase]
+            boundary = stage['end_index']
+            p = plan.tcp_position
+            incoming = (p[boundary-1]-p[boundary-2])/simulation.dt
+            outgoing = (p[boundary]-p[boundary-1])/simulation.dt
+            assert incoming[2] < -.8*speed
+            assert outgoing[2] < -.8*speed
+            # These are velocities averaged over adjacent 100 ms intervals,
+            # not instantaneous endpoint derivatives. Bound their difference
+            # by the configured acceleration; C2 endpoints are tested separately.
+            assert np.linalg.norm(incoming-outgoing)/simulation.dt <= options['max_cartesian_acceleration']
+        velocity = np.diff(np.vstack((plan.initial_arm_qpos, plan.arm_qpos)), axis=0)/simulation.dt
+        acceleration = np.diff(np.vstack((np.zeros(7), velocity, np.zeros(7))), axis=0)/simulation.dt
+        assert np.all(np.max(abs(velocity), axis=0) <= np.asarray(plan.validation['joint_velocity_limits_rad_s'])*1.0001)
+        assert np.all(np.max(abs(acceleration), axis=0) <= np.asarray(plan.validation['joint_acceleration_limits_rad_s2'])*1.0001)
+        align = _phase_positions(plan, 'align')
+        insert = _phase_positions(plan, 'shallow_insert')
+        assert np.all(np.diff(np.vstack((align, insert))[:, 2]) < 0)
+    finally:
+        simulation.close()

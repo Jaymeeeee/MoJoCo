@@ -30,6 +30,7 @@ def test_cli_overrides_model_layout_and_action_horizon(runner):
     assert call['duration'] == 2
     assert call['video'] is False
     assert call['stop_on_contact'] is False
+    assert call['contact_diagnostics'] is False
 
 
 def test_config_positions_are_available_without_manifest_override(runner):
@@ -37,6 +38,8 @@ def test_config_positions_are_available_without_manifest_override(runner):
         cli.main(['rollout', '--position', 'config'])
     assert runner[0]['position'] is None
     assert runner[0]['config'] == cli.ROOT / 'config/insert_plug.yaml'
+    assert runner[0]['stop_on_contact'] is False
+    assert runner[0]['contact_diagnostics'] is False
 
 
 def test_headless_viewer_is_rejected_before_loading_model(runner, monkeypatch):
@@ -53,4 +56,43 @@ def test_policy_config_typo_is_rejected_before_execution(runner, tmp_path):
     path.write_text('checkpoint: local_model\nn_action_step: 100\n')
     with pytest.raises(ValueError, match='Invalid policy configuration'):
         cli.main(['rollout', '--policy-config', str(path)])
+    assert runner == []
+
+
+def test_contact_diagnostics_are_explicit_and_do_not_imply_stopping(runner):
+    with pytest.raises(SystemExit):
+        cli.main(['rollout', '--contact-diagnostics'])
+    assert runner[0]['contact_diagnostics'] is True
+    assert runner[0]['stop_on_contact'] is False
+
+
+def test_strict_contact_stopping_requires_explicit_option(runner):
+    with pytest.raises(SystemExit):
+        cli.main(['rollout', '--stop-on-contact'])
+    assert runner[0]['stop_on_contact'] is True
+
+
+def test_legacy_continue_flag_overrides_saved_strict_mode(runner, tmp_path):
+    path = tmp_path / 'policy.yaml'
+    path.write_text('checkpoint: local_model\nstop_on_contact: true\ncontact_diagnostics: true\n')
+    with pytest.raises(SystemExit):
+        cli.main(['rollout', '--policy-config', str(path), '--continue-on-contact'])
+    assert runner[0]['stop_on_contact'] is False
+    assert runner[0]['contact_diagnostics'] is True
+
+
+def test_cli_can_disable_optional_contact_diagnostics_from_yaml(runner, tmp_path):
+    path = tmp_path / 'policy.yaml'
+    path.write_text('checkpoint: local_model\nstop_on_contact: true\ncontact_diagnostics: true\n')
+    with pytest.raises(SystemExit):
+        cli.main(['rollout', '--policy-config', str(path),
+                  '--no-contact-diagnostics', '--no-stop-on-contact'])
+    assert runner[0]['stop_on_contact'] is False
+    assert runner[0]['contact_diagnostics'] is False
+
+
+def test_conflicting_contact_stop_cli_flags_are_rejected(runner):
+    with pytest.raises(SystemExit) as exit_info:
+        cli.main(['rollout', '--stop-on-contact', '--continue-on-contact'])
+    assert exit_info.value.code == 2
     assert runner == []

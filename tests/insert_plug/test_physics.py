@@ -92,6 +92,9 @@ def test_expert_physically_transfers_free_peg(sim, monkeypatch):
     assert result["metrics"]["stable_for_final_250ms"]
     assert physical_steps == result["steps"] * sim.substeps
     assert result["steps"] == len(trace)
+    # The default fixed scene must finish in strictly less than 20 simulated
+    # seconds, including grasp settling, release and final success checks.
+    assert result['steps'] < 200
     assert physical_steps > 100
     np.testing.assert_allclose(np.diff([row["time"] for row in trace]), sim.dt, atol=1e-10)
 

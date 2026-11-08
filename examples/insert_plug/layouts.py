@@ -48,8 +48,12 @@ def manifest_row(row):
     physics = row['physics_check']
     result['physics_check'] = {key: physics[key] for key in (
         'success', 'duration_seconds', 'control_steps', 'radial_error_m', 'insertion_depth_m')}
-    result['physics_check']['unsafe_contact_count'] = (physics['execution_checks']['unsafe_contact_count']
-        if 'execution_checks' in physics else physics['unsafe_contact_count'])
+    checks = physics.get('execution_checks', physics)
+    result['physics_check'].update(
+        collision_checks_enabled=checks.get('collision_checks_enabled', True),
+        contact_checks=checks.get('checks', checks.get('contact_checks')),
+        unsafe_contact_count=checks['unsafe_contact_count'],
+    )
     return result
 
 

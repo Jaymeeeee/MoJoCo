@@ -91,12 +91,38 @@ def audit_episode(folder, sample_hz=10.0, control_hz=10.0):
     plans = execution.get('planning', [])
     require(bool(plans) and all(p.get('valid') is True for p in plans), 'Missing or unsuccessful planning checks')
     checks = execution.get('execution_checks', {})
-    require(checks.get('unsafe_contact_count') == 0 and checks.get('last_violation') is None,
-            'Execution contains an unsafe-contact violation')
     control_steps = execution.get('steps', 0)
     require(isinstance(control_steps, int) and control_steps > 0, 'Missing executed control-step count')
     physics_steps = control_steps * round(1 / (metadata['control_hz'] * metadata['physics_timestep']))
-    require(checks.get('checks') == physics_steps, 'Contact guard did not check every physics step')
+    collision_checks_enabled = checks.get('collision_checks_enabled', True)
+    require(type(collision_checks_enabled) is bool, 'Collision-check mode must be a boolean')
+    planning_options = config['task'].get('planning', {})
+    if 'collision_checks_enabled' in checks:
+        configured_mode = planning_options.get('strict_collision_checks', False)
+        require(type(configured_mode) is bool and configured_mode is collision_checks_enabled,
+                'Collision-check mode disagrees with YAML configuration')
+        require(metadata.get('strict_collision_checks') is collision_checks_enabled,
+                'Collision-check mode disagrees with HDF5 metadata')
+        require(all(p.get('collision_checks_enabled') is collision_checks_enabled for p in plans),
+                'Planning and execution collision-check modes disagree')
+    else:
+        # Historical recordings predate the flag and always ran the guard.
+        # Declared new-mode metadata cannot be hidden by dropping that flag.
+        require(metadata.get('strict_collision_checks', True) is True
+                and planning_options.get('strict_collision_checks', True) is True,
+                'Legacy guard report contradicts declared collision-check mode')
+    require('last_violation' in checks and checks['last_violation'] is None,
+            'Execution contains or omits its last unsafe-contact violation')
+    if collision_checks_enabled:
+        require(type(checks.get('unsafe_contact_count')) is int and checks['unsafe_contact_count'] == 0,
+                'Execution contains an unsafe-contact violation')
+        require(type(checks.get('checks')) is int and checks['checks'] == physics_steps,
+                'Contact guard did not check every physics step')
+    else:
+        require(type(checks.get('checks')) is int and checks['checks'] == 0,
+                'Disabled contact checks must report zero guard calls')
+        require('unsafe_contact_count' in checks and checks['unsafe_contact_count'] is None,
+                'Disabled contact checks must report unknown unsafe contacts, not zero')
     metrics = metadata.get('final_metrics', {})
     require(metrics.get('success') is True and metrics.get('stable_for_final_250ms') is True,
             'Final seating/stability checks did not succeed')
@@ -140,7 +166,8 @@ def audit_episode(folder, sample_hz=10.0, control_hz=10.0):
         source_xy=config['board']['source_xy'], target_xy=config['board']['target_xy'],
         max_video_rgb_mean_absolute_error=max(errors),
         radial_error_m=float(metrics['radial_error_m']),
-        unsafe_contacts=int(checks['unsafe_contact_count']),
+        collision_checks_enabled=collision_checks_enabled,
+        contact_checks=checks['checks'], unsafe_contacts=checks['unsafe_contact_count'],
     )
 
 
@@ -229,7 +256,12 @@ def audit_batch(root, *, positions=10, episodes_per_position=10, sample_hz=10.0,
             report['errors'].append(f'{name}: ' + '; '.join(group['errors']))
     episodes = [episode for group in report['groups'] for episode in group['episodes']]
     report.update(episodes=len(episodes), total_frames=sum(x['frames'] for x in episodes),
-                  total_bytes=sum(x['bytes'] for x in episodes), valid=not report['errors'])
+                  total_bytes=sum(x['bytes'] for x in episodes), valid=not report['errors'],
+                  collision_checked_episodes=sum(x['collision_checks_enabled'] for x in episodes),
+                  collision_unchecked_episodes=sum(not x['collision_checks_enabled'] for x in episodes),
+                  total_contact_checks=sum(x['contact_checks'] for x in episodes),
+                  total_unsafe_contacts=(sum(x['unsafe_contacts'] for x in episodes)
+                      if episodes and all(x['unsafe_contacts'] is not None for x in episodes) else None))
     return report
 
 

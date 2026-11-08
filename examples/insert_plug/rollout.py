@@ -132,23 +132,29 @@ def _seed_policy(seed):
 
 
 def run_episode(sim, policy, *, duration=60.0, video_path=None, viewer=False,
-                realtime=False, stop_on_contact=True, quiet=False):
+                realtime=False, stop_on_contact=False, contact_diagnostics=False, quiet=False):
     """Run one already-created scene and return metrics, including failures.
 
     Setup/contract errors are raised. Inference, invalid actions and physics
     failures during rollout become explicit failed results; targets are never
-    silently clipped or replaced. Contact violations stop at the physics tick
-    by default, which may leave the last 100 ms interval partially executed.
+    silently clipped or replaced. MuJoCo retains ordinary physical contacts;
+    extra contact classification is disabled unless explicitly requested.
+    Strict contact stopping is an opt-in diagnostic mode.
     """
     if not np.isfinite(duration) or duration <= 0:
         raise ValueError('duration must be finite and positive')
     interval_count = duration / sim.dt
     if not math.isclose(interval_count, round(interval_count), rel_tol=0, abs_tol=1e-8):
         raise ValueError('duration must be an exact multiple of the 100 ms control interval')
+    if type(stop_on_contact) is not bool or type(contact_diagnostics) is not bool:
+        raise ValueError('stop_on_contact and contact_diagnostics must be booleans')
     validate_contract(sim.config, policy)
     policy.reset()
-    monitor = ReplayContactMonitor(sim)
-    monitor.phase = 'policy_rollout'
+    contact_diagnostics = bool(contact_diagnostics or stop_on_contact)
+    contact_policy = 'stop' if stop_on_contact else 'diagnostic' if contact_diagnostics else 'off'
+    monitor = ReplayContactMonitor(sim) if contact_diagnostics else None
+    if monitor is not None:
+        monitor.phase = 'policy_rollout'
     stability = PhysicalSuccessMonitor(sim)
     previous_callback = sim.safety_callback
     previous_depth = sim.depth_enabled
@@ -157,12 +163,13 @@ def run_episode(sim, policy, *, duration=60.0, video_path=None, viewer=False,
     sim.depth_enabled = False
 
     def physics_check():
-        monitor()
-        if stop_on_contact and monitor.unsafe_contact_count:
-            row = monitor.last_violation
-            raise ExecutionSafetyError(f'{row["reason"]} at t={row["time_s"]:.3f}s: '
-                                       f'{row["geom1"]} / {row["geom2"]}')
         stability.sample()
+        if monitor is not None:
+            monitor()
+            if stop_on_contact and monitor.unsafe_contact_count:
+                row = monitor.last_violation
+                raise ExecutionSafetyError(f'{row["reason"]} at t={row["time_s"]:.3f}s: '
+                                           f'{row["geom1"]} / {row["geom2"]}')
 
     sim.safety_callback = physics_check
     writer = None
@@ -218,14 +225,14 @@ def run_episode(sim, policy, *, duration=60.0, video_path=None, viewer=False,
                     sim.step(action)
                     completed_steps += 1
                     if stability.stable:
-                        stop_reason = ('success' if not monitor.unsafe_contact_count else
-                                       'task_success_with_contact_violations')
+                        stop_reason = 'success'
                         break
                     if not quiet and completed_steps % 100 == 0:
                         print(json.dumps(dict(event='rollout_progress',
                                               simulation_seconds=round(float(sim.data.time), 3),
                                               actions=completed_steps,
-                                              unsafe_contacts=monitor.unsafe_contact_count)), flush=True)
+                                              unsafe_contacts=(monitor.unsafe_contact_count
+                                                               if monitor is not None else None))), flush=True)
                     if realtime:
                         remaining = (float(sim.data.time) - initial_sim_time) - (time.monotonic() - started)
                         if remaining > 0:
@@ -259,19 +266,24 @@ def run_episode(sim, policy, *, duration=60.0, video_path=None, viewer=False,
         sim.depth_enabled = previous_depth
         if writer is not None:
             writer.close()
-    contacts = monitor.summary()
+    contacts = (dict(enabled=True, **monitor.summary()) if monitor is not None else
+                dict(enabled=False, checks=0, unsafe_contact_count=None,
+                     first_violation=None, last_violation=None))
     task_success = bool(stability.stable and final_metrics and final_metrics['success'] and error is None)
-    clean = contacts['unsafe_contact_count'] == 0
+    clean = contacts['unsafe_contact_count'] == 0 if monitor is not None else None
     times = np.asarray(selection_wall_times)
     elapsed = float(sim.data.time) - initial_sim_time
     return _json_finite(dict(
-        success=bool(task_success and clean), task_success=task_success, contact_clean=clean,
+        success=bool(task_success and (not stop_on_contact or clean)),
+        task_success=task_success, contact_clean=clean,
+        stop_on_contact=stop_on_contact, contact_diagnostics=contact_diagnostics,
+        contact_policy=contact_policy, contact_checks=contacts['checks'],
         stop_reason=stop_reason, runtime_error=error,
         requested_duration_s=duration, simulation_seconds=float(sim.data.time) - initial_sim_time,
         wall_seconds=time.monotonic() - started,
         control_hz=sim.control_hz, action_hold_s=sim.dt, physics_timestep_s=sim.model.opt.timestep,
         completed_control_steps=completed_steps, attempted_control_steps=attempted_steps,
-        selected_actions=selected_actions, physics_checks=monitor.checks,
+        selected_actions=selected_actions, physics_checks=stability.samples,
         partial_final_control_interval=not math.isclose(elapsed / sim.dt, round(elapsed / sim.dt),
                                                        rel_tol=0, abs_tol=1e-8),
         policy_selection_wall_seconds=dict(count=len(times), mean=float(times.mean()) if len(times) else None,
@@ -290,7 +302,8 @@ def run_episode(sim, policy, *, duration=60.0, video_path=None, viewer=False,
 
 def run_rollouts(*, checkpoint, config=None, output=None, position=None, positions_config=None,
                  episodes=1, seed=0, duration=60.0, device='auto', n_action_steps=1,
-                 viewer=False, realtime=False, video=True, stop_on_contact=True, quiet=False):
+                 viewer=False, realtime=False, video=True, stop_on_contact=False,
+                 contact_diagnostics=False, quiet=False):
     """Load one checkpoint, evaluate fixed layouts, and save reviewable results."""
     from mujoco_tools.lerobot_policy import LeRobotPolicy
 
@@ -300,6 +313,9 @@ def run_rollouts(*, checkpoint, config=None, output=None, position=None, positio
         raise ValueError('seed must be an integer in [0, 2**32)')
     if not np.isfinite(duration) or duration <= 0 or not math.isclose(duration * 10, round(duration * 10), abs_tol=1e-8):
         raise ValueError('duration must be positive and a multiple of 0.1 seconds')
+    if type(stop_on_contact) is not bool or type(contact_diagnostics) is not bool:
+        raise ValueError('stop_on_contact and contact_diagnostics must be booleans')
+    contact_diagnostics = bool(contact_diagnostics or stop_on_contact)
     cfg = load_config(config)
     layouts = select_layouts(cfg, position, positions_config)
     destination = (Path(output).expanduser().resolve() if output is not None else
@@ -330,18 +346,21 @@ def run_rollouts(*, checkpoint, config=None, output=None, position=None, positio
                     result = run_episode(sim, policy, duration=duration,
                                          video_path=episode_dir / 'rollout.mp4' if video else None,
                                          viewer=viewer, realtime=realtime,
-                                         stop_on_contact=stop_on_contact, quiet=quiet)
+                                         stop_on_contact=stop_on_contact,
+                                         contact_diagnostics=contact_diagnostics, quiet=quiet)
                 finally:
                     sim.close()
                 result.update(episode_index=episode_index, seed=episode_seed, position=layout_name,
                               repetition=repeat, config=layout_cfg, policy=policy.metadata(),
-                              stop_on_contact=stop_on_contact, scene='scene.xml')
+                              scene='scene.xml')
                 report_path = episode_dir / 'result.json'
                 report_path.write_text(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False) + '\n',
                                        encoding='utf-8')
                 rows.append(dict(episode_index=episode_index, position=layout_name,
                                  success=result['success'], task_success=result['task_success'],
                                  contact_clean=result['contact_clean'], stop_reason=result['stop_reason'],
+                                 contact_diagnostics=result['contact_diagnostics'],
+                                 contact_policy=result['contact_policy'], contact_checks=result['contact_checks'],
                                  simulation_seconds=result['simulation_seconds'],
                                  unsafe_contact_count=result['contacts']['unsafe_contact_count'],
                                  report=str(report_path.relative_to(destination)),
@@ -353,6 +372,9 @@ def run_rollouts(*, checkpoint, config=None, output=None, position=None, positio
                                episodes_completed=len(rows), successes=sum(row['success'] for row in rows),
                                success_rate=sum(row['success'] for row in rows) / len(rows),
                                control_hz=10, physics_hz=1000, stop_on_contact=stop_on_contact,
+                               contact_diagnostics=contact_diagnostics,
+                               contact_policy=('stop' if stop_on_contact else
+                                               'diagnostic' if contact_diagnostics else 'off'),
                                results=rows)
                 summary['complete'] = len(rows) == summary['episodes_requested']
                 summary['success'] = bool(summary['complete'] and summary['successes'] == len(rows))

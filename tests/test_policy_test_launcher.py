@@ -44,7 +44,15 @@ def write_position(configuration, index, count=10, success=False):
         folder.mkdir()
         report = dict(episode_index=repeat, repetition=repeat, position=f'pos{index}',
                       seed=index * 10 + repeat, requested_duration_s=60., config=scene,
-                      stop_on_contact=True, control_hz=10, action_hold_s=.1, physics_timestep_s=.001,
+                      stop_on_contact=configuration['stop_on_contact'],
+                      contact_diagnostics=configuration['contact_diagnostics'],
+                      contact_policy=configuration['contact_policy'],
+                      contact_clean=True if configuration['contact_diagnostics'] else None,
+                      contact_checks=60000 if configuration['contact_diagnostics'] else 0,
+                      contacts=dict(enabled=configuration['contact_diagnostics'],
+                                    checks=60000 if configuration['contact_diagnostics'] else 0,
+                                    unsafe_contact_count=0 if configuration['contact_diagnostics'] else None),
+                      control_hz=10, action_hold_s=.1, physics_timestep_s=.001,
                       scene='scene.xml', video='rollout.mp4', stop_reason='success' if success else 'timeout',
                       success=success, policy=dict(checkpoint=configuration['checkpoint'],
                       n_action_steps=10, device='cuda',
@@ -86,6 +94,48 @@ def test_freezes_configs_hashes_and_global_seed_blocks(configuration):
                        '--device': 'cuda', '--n-action-steps': '10', '--duration': '60.0'}.items():
         assert command[command.index(key) + 1] == value
     assert '--viewer' not in command and '--continue-on-contact' not in command
+    assert '--no-stop-on-contact' in command and '--no-contact-diagnostics' in command
+    assert configuration['contact_policy'] == 'off'
+    assert configuration['stop_on_contact'] is False and configuration['contact_diagnostics'] is False
+
+
+@pytest.mark.parametrize('flags,mode,stop,diagnostics', [
+    (['--stop-on-contact'], 'stop', True, True),
+    (['--contact-diagnostics'], 'diagnostic', False, True),
+])
+def test_contact_options_are_frozen_and_forwarded(configuration, flags, mode, stop, diagnostics):
+    output = str(Path(configuration['output']).with_name(mode))
+    args = launcher.parse_args(['--policy-config', configuration['policy_config'], '--output', output, *flags])
+    configured = launcher.prepare(args)
+    assert configured['contact_policy'] == mode
+    assert configured['stop_on_contact'] is stop and configured['contact_diagnostics'] is diagnostics
+    command = launcher.command_for(configured, 0)
+    assert ('--stop-on-contact' if stop else '--no-stop-on-contact') in command
+    assert '--contact-diagnostics' in command
+    write_position(configured, 0)
+    assert launcher.validate_position(configured, 0)['episodes_completed'] == 10
+
+
+def test_policy_contact_defaults_can_be_explicitly_disabled(configuration):
+    policy_path = Path(configuration['policy_config'])
+    policy = yaml.safe_load(policy_path.read_text())
+    policy.update(stop_on_contact=True, contact_diagnostics=True)
+    policy_path.write_text(yaml.safe_dump(policy))
+    args = launcher.parse_args(['--policy-config', str(policy_path), '--output',
+                               str(Path(configuration['output']).with_name('disabled')),
+                               '--no-stop-on-contact', '--no-contact-diagnostics'])
+    configured = launcher.prepare(args)
+    assert configured['contact_policy'] == 'off'
+
+
+def test_disabled_contact_diagnostics_cannot_claim_zero_contacts(configuration):
+    write_position(configuration, 0)
+    path = Path(configuration['output'])/'pos0/episode_000000/result.json'
+    report = json.loads(path.read_text())
+    report['contacts']['unsafe_contact_count'] = 0
+    path.write_text(json.dumps(report))
+    with pytest.raises(ValueError, match='remain unmeasured'):
+        launcher.validate_position(configuration, 0)
 
 
 def test_child_environment_does_not_mutate_launcher(monkeypatch):

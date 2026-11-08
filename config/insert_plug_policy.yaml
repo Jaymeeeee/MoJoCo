@@ -11,3 +11,7 @@ device: auto
 n_action_steps: 50
 # Simulated seconds. Physics/control remain 1 kHz / 10 Hz.
 duration: 60.0
+# Ordinary contacts remain part of MuJoCo physics and do not stop the policy.
+# Enable these only when explicitly investigating contact diagnostics.
+contact_diagnostics: false
+stop_on_contact: false

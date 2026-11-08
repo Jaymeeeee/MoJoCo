@@ -10,6 +10,7 @@ import pytest
 import yaml
 
 from examples.insert_plug.dataset import EpisodeWriter
+from examples.insert_plug.layouts import manifest_row
 from examples.insert_plug.recording import RecordingSampler
 from examples.insert_plug.replay import generate_head_video
 from scripts.audit_insert_plug_batch import audit_batch, audit_episode, grid_steps
@@ -195,3 +196,96 @@ def test_off_grid_or_reused_holder_positions_fail(tmp_path):
     result = audit_batch(tmp_path, positions=2, episodes_per_position=1)
     assert not result['valid']
     assert any('reused' in error for error in result['errors'])
+
+
+def set_collision_mode(folder, enabled):
+    def change(meta):
+        meta['strict_collision_checks'] = enabled
+        meta['config']['task'].setdefault('planning', {})['strict_collision_checks'] = enabled
+        meta['execution_result']['execution_checks'].update(
+            collision_checks_enabled=enabled, checks=300 if enabled else 0,
+            unsafe_contact_count=0 if enabled else None, last_violation=None)
+        for plan in meta['execution_result']['planning']:
+            plan['collision_checks_enabled'] = enabled
+    update_metadata(folder, change, sync_yaml=True)
+
+
+@pytest.mark.parametrize('enabled', [False, True])
+def test_explicit_collision_modes_preserve_success_and_unknown_contact_counts(tmp_path, enabled):
+    folder = make_episode(tmp_path)
+    set_collision_mode(folder, enabled)
+    episode = audit_episode(folder)
+    assert episode['collision_checks_enabled'] is enabled
+    assert episode['contact_checks'] == (300 if enabled else 0)
+    assert episode['unsafe_contacts'] == (0 if enabled else None)
+    assert episode['physics_steps'] == 300  # Physical integration remains enabled.
+    batch = audit_batch(tmp_path, positions=1, episodes_per_position=1)
+    assert batch['valid'], batch['errors']
+    assert batch['collision_checked_episodes'] == int(enabled)
+    assert batch['collision_unchecked_episodes'] == int(not enabled)
+    assert batch['total_contact_checks'] == (300 if enabled else 0)
+    assert batch['total_unsafe_contacts'] == (0 if enabled else None)
+
+
+@pytest.mark.parametrize('damage', [
+    'count_zero', 'calls_nonzero', 'violation', 'metadata_mode', 'config_mode',
+    'planning_mode', 'missing_mode', 'nonboolean_mode',
+])
+def test_disabled_collision_audit_rejects_false_or_inconsistent_claims(tmp_path, damage):
+    folder = make_episode(tmp_path)
+    set_collision_mode(folder, False)
+
+    def change(meta):
+        checks = meta['execution_result']['execution_checks']
+        if damage == 'count_zero':
+            checks['unsafe_contact_count'] = 0
+        elif damage == 'calls_nonzero':
+            checks['checks'] = 300
+        elif damage == 'violation':
+            checks['last_violation'] = {'reason': 'contact'}
+        elif damage == 'metadata_mode':
+            meta['strict_collision_checks'] = True
+        elif damage == 'config_mode':
+            meta['config']['task']['planning']['strict_collision_checks'] = True
+        elif damage == 'planning_mode':
+            meta['execution_result']['planning'][0]['collision_checks_enabled'] = True
+        elif damage == 'missing_mode':
+            del checks['collision_checks_enabled']
+        else:
+            checks['collision_checks_enabled'] = 0
+
+    update_metadata(folder, change, sync_yaml=True)
+    with pytest.raises(ValueError, match='[Cc]ollision|[Cc]ontact|violation|guard'):
+        audit_episode(folder)
+
+
+def test_mixed_contact_monitoring_batch_does_not_turn_unknown_into_zero(tmp_path):
+    old = make_episode(tmp_path)
+    new = make_episode(tmp_path, 1, source=(.49, -.07), target=(.45, .11))
+    set_collision_mode(new, False)
+    assert audit_episode(old)['collision_checks_enabled'] is True
+    batch = audit_batch(tmp_path, positions=2, episodes_per_position=1)
+    assert batch['valid'], batch['errors']
+    assert batch['collision_checked_episodes'] == batch['collision_unchecked_episodes'] == 1
+    assert batch['total_contact_checks'] == 300
+    assert batch['total_unsafe_contacts'] is None
+
+
+@pytest.mark.parametrize('enabled,nested', [(False, True), (True, True), (False, False), (True, False)])
+def test_layout_manifest_preserves_explicit_contact_monitoring_mode(enabled, nested):
+    checks = dict(collision_checks_enabled=enabled, unsafe_contact_count=0 if enabled else None)
+    checks['checks' if nested else 'contact_checks'] = 300 if enabled else 0
+    physics = dict(success=True, duration_seconds=.3, control_steps=3,
+                   radial_error_m=0., insertion_depth_m=.03)
+    if nested:
+        physics['execution_checks'] = checks
+    else:
+        physics.update(checks)
+    row = dict(name='pos0', source_xy=[.47, -.05], target_xy=[.43, .09],
+               source_steps=[1, 1], target_steps=[-1, 1], physics_check=physics,
+               visibility={phase: dict(all_inside=True, min_edge_margin_px=5.)
+                           for phase in ('initial', 'final')})
+    compact = manifest_row(row)['physics_check']
+    assert compact['collision_checks_enabled'] is enabled
+    assert compact['contact_checks'] == (300 if enabled else 0)
+    assert compact['unsafe_contact_count'] == (0 if enabled else None)

@@ -1,4 +1,4 @@
-"""Execute collision-checked plans with stage gates and real contact dynamics."""
+"""Execute smooth plans with grasp/task checks and real contact dynamics."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -24,7 +24,10 @@ class Expert:
         self.phase_results, self.final_checks, self.grasp_history = [], [], []
         self.plans, self.plan_files = [], {}
         self.preflight_plan = None
-        self.guard = MotionGuard(sim)
+        # Ordinary peg/holder and pad contacts belong to MuJoCo dynamics. The
+        # old threshold-based abort policy is only an explicit diagnostic mode.
+        self.guard = MotionGuard(sim) if self.options.get('strict_collision_checks', False) else None
+        self.phase = 'settle_initial'
         self.max_fit_error = 0.
         self.max_insertion_error = 0.
         self.alignment_corrections = 0
@@ -37,7 +40,9 @@ class Expert:
             self.writer.append(self.sim.record(action, phase))
 
     def tick(self, target, width, phase):
-        self.guard.phase = phase
+        self.phase = phase
+        if self.guard is not None:
+            self.guard.phase = phase
         # Execute the exact float32 values retained by policy datasets. The
         # simulator promotes them to float64 without changing their values.
         action = np.r_[target, width].astype(np.float32).astype(np.float64)
@@ -65,26 +70,57 @@ class Expert:
         for _ in range(max(1, int(np.ceil(seconds/self.sim.dt)))):
             self.tick(target, width, phase)
 
-    def _settle_tracking(self, stage, target):
-        """Wait for the actual pose and joint speeds before the next segment."""
+    def _tracking_status(self, stage):
+        """Check the actual endpoint pose, not just the commanded target."""
         position, rotation = np.asarray(stage['end_position']), np.asarray(stage['end_rotation'])
-        consecutive = 0
+        error = np.linalg.norm(self.sim.site('tcp')-position)
+        actual = self.sim.data.site_xmat[self.sim.tcp_id].reshape(3, 3)
+        angle = np.linalg.norm(Rotation.from_matrix(rotation @ actual.T).as_rotvec())
+        speed = np.max(np.abs(self.sim.data.qvel[self.sim.arm_dadr]))
+        good = (error <= self.options.get('tracking_position_tolerance', .00005)
+                and angle <= self.options.get('tracking_rotation_tolerance', .0005)
+                and speed <= self.options.get('tracking_joint_speed_tolerance', .01))
+        return good, dict(position_error_m=float(error), rotation_error_rad=float(angle),
+                          max_joint_speed_rad_s=float(speed))
+
+    def _settle_tracking(self, stage, target, stable_since=None):
+        """Count stability already observed at the end of the moving segment."""
+        required = float(self.options.get('tracking_stable_seconds', .2))
+        if not np.isfinite(required) or required < 0:
+            raise ValueError('tracking_stable_seconds must be finite and nonnegative')
+        started = float(self.sim.data.time)
         count = int(np.ceil(float(self.options.get('tracking_timeout', 2.))/self.sim.dt))
-        for _ in range(count):
-            self.tick(target, stage['width'], stage['phase'])
-            error = np.linalg.norm(self.sim.site('tcp')-position)
-            actual = self.sim.data.site_xmat[self.sim.tcp_id].reshape(3, 3)
-            angle = np.linalg.norm(Rotation.from_matrix(rotation @ actual.T).as_rotvec())
-            speed = np.max(np.abs(self.sim.data.qvel[self.sim.arm_dadr]))
-            good = (error <= self.options.get('tracking_position_tolerance', .00005)
-                    and angle <= self.options.get('tracking_rotation_tolerance', .0005)
-                    and speed <= self.options.get('tracking_joint_speed_tolerance', .01))
-            consecutive = consecutive+1 if good else 0
-            if consecutive >= max(3, int(round(.1/self.sim.dt))):
-                return dict(position_error_m=float(error), rotation_error_rad=float(angle),
-                            max_joint_speed_rad_s=float(speed))
+        for index in range(count+1):
+            good, checks = self._tracking_status(stage)
+            now = float(self.sim.data.time)
+            stable_since = (now if stable_since is None else stable_since) if good else None
+            if stable_since is not None and now-stable_since >= required-1e-9:
+                return dict(**checks, tracking_wait_seconds=now-started,
+                            tracking_stable_seconds=now-stable_since)
+            if index < count:
+                self.tick(target, stage['width'], stage['phase'])
         raise ExecutionSafetyError(f"{stage['phase']}: tracking did not settle: "
-                                   f"position {error*1000:.3f} mm, rotation {angle:.6f} rad")
+                                   f"position {checks['position_error_m']*1000:.3f} mm, "
+                                   f"rotation {checks['rotation_error_rad']:.6f} rad")
+
+    def _settle_grasp(self):
+        """Continue once both pads are stable; fixed waits remain a legacy option."""
+        timeout = float(self.options.get('grasp_settle_seconds', .8))
+        if not self.options.get('adaptive_grasp_settle', False):
+            self.hold(timeout, self.closed, 'grasp')
+            return dict(**self._check_grasp(), grasp_wait_seconds=timeout)
+        if not np.isfinite(timeout) or timeout < 0:
+            raise ValueError('grasp_settle_seconds must be finite and nonnegative')
+        started = float(self.sim.data.time)
+        count = int(np.ceil(timeout/self.sim.dt))
+        for index in range(count+1):
+            try:
+                checks = self._check_grasp()
+                return dict(**checks, grasp_wait_seconds=float(self.sim.data.time)-started)
+            except ExecutionSafetyError:
+                if index == count:
+                    raise
+            self.tick(self.sim.last_target.copy(), self.closed, 'grasp')
 
     def _check_fit(self):
         """The shaft axis must fit the whole future insertion interval."""
@@ -100,7 +136,7 @@ class Expert:
                   for height in (seat, target[2])]
         error = float(max(errors))
         self.max_fit_error = max(self.max_fit_error, error)
-        if self.guard.phase in ('shallow_insert', 'insertion_check'):
+        if self.phase in ('shallow_insert', 'insertion_check'):
             self.max_insertion_error = max(self.max_insertion_error, error)
         clearance = sim.config['board']['hole_radius']-sim.config['peg']['shaft_radius']
         budget = clearance-float(self.options.get('alignment_margin', .00015))
@@ -130,18 +166,31 @@ class Expert:
             expected = float(self.options.get('insertion_depth', .006))
             if depth < expected-.0003 or len(self.sim.gripper_contacts()) != 2:
                 raise ExecutionSafetyError(f'Release blocked: depth {depth*1000:.3f} mm or lost grasp')
+        tracking = phase in ('approach', 'descend_to_grasp', 'extract', 'transfer',
+                             'align', 'shallow_insert', 'retract')
+        if self.options.get('continuous_free_space', False) and phase in ('approach', 'extract', 'retract'):
+            # These are clearance waypoints, not contact operations. Continue
+            # the validated targets without waiting for a 50-micrometre pose.
+            # Extraction clearance and final seated/withdrawn success are still
+            # checked below; real MuJoCo contact dynamics stay active.
+            tracking = False
+        if self.options.get('continuous_hover', False) and phase in ('approach', 'transfer', 'align'):
+            tracking = False
+        stable_since = None
         for index in range(stage['start_index'], stage['end_index']):
             self.tick(plan.arm_qpos[index], plan.gripper_width[index], phase)
+            if tracking:
+                good, _ = self._tracking_status(stage)
+                stable_since = (float(self.sim.data.time) if stable_since is None else stable_since) if good else None
         checks = {}
-        if phase in ('approach', 'descend_to_grasp', 'extract', 'transfer', 'align', 'shallow_insert', 'retract'):
-            checks.update(self._settle_tracking(stage, plan.arm_qpos[stage['end_index']-1]))
+        if tracking:
+            checks.update(self._settle_tracking(stage, plan.arm_qpos[stage['end_index']-1], stable_since))
         if phase == 'descend_to_grasp':
             error = self.sim.site('tcp')-self.sim.site('peg_head')
             if np.linalg.norm(error[:2]) > .00015 or abs(error[2]) > .0004:
                 raise ExecutionSafetyError(f'Grasp alignment failed: TCP/head offset {error.tolist()}')
         if phase == 'grasp':
-            self.hold(self.options.get('grasp_settle_seconds', .8), self.closed, phase)
-            checks.update(self._check_grasp())
+            checks.update(self._settle_grasp())
         if phase == 'extract':
             if self.sim.site('peg_tip')[2] <= max(self.sim.site('source_hole')[2], self.sim.site('target_hole')[2])+.015:
                 raise ExecutionSafetyError('Extraction did not establish transport clearance')
@@ -165,9 +214,9 @@ class Expert:
     def run(self):
         previous_callback = self.sim.safety_callback
         try:
-            # Entire nominal task is checked before advancing the live scene.
+            # Solve the nominal IK and motion bounds before advancing physics.
             plan = self.preflight_plan if self.preflight_plan is not None else self.prepare()
-            self.sim.safety_callback = self.guard
+            self.sim.safety_callback = self.guard or previous_callback
             for stage in plan.stages:
                 self._execute_stage(plan, stage)
                 if stage['phase'] == 'grasp':
@@ -182,8 +231,12 @@ class Expert:
                     break
             # Reobserve at transport height, then correct alignment in free
             # space. The entry fit budget is never relaxed to accept a drift.
-            for attempt in range(3):
-                insertion = TaskPlanner(self.sim).plan(start_phase='align')
+            continuous = bool(self.options.get('continuous_hover', False))
+            incoming_velocity = stage.get('end_velocity', [0., 0., 0.])
+            for attempt in range(1 if continuous else 3):
+                insertion = TaskPlanner(self.sim).plan(
+                    start_phase='align', continue_from_target=continuous,
+                    initial_velocity=incoming_velocity if continuous else None)
                 self._save_plan(insertion, f'target_alignment_{attempt}')
                 self._execute_stage(insertion, insertion.stages[0], check_alignment=False)
                 try:
@@ -191,7 +244,7 @@ class Expert:
                     self.phase_results[-1]['checks'].update(fit)
                     break
                 except ExecutionSafetyError:
-                    if attempt == 2:
+                    if continuous or attempt == 2:
                         raise
                     self.alignment_corrections += 1
             for stage in insertion.stages[1:]:
@@ -222,11 +275,14 @@ class Expert:
         metrics['stable_for_final_250ms'] = stable
         metrics['final_success_observation_span_seconds'] = float(stable_span)
         success = bool(metrics['success'] and stable and not reason)
+        contacts = (dict(collision_checks_enabled=True, **self.guard.summary()) if self.guard is not None
+                    else dict(collision_checks_enabled=False, checks=0,
+                              unsafe_contact_count=None, last_violation=None))
         return dict(success=success, failure_reason=reason or ('' if success else 'final_seating_check_failed'),
                     steps=self.steps, metrics=metrics, phases=self.phase_results,
                     trajectory_files=self.plan_files,
                     planning=[plan.validation for plan in self.plans],
-                    execution_checks=dict(**self.guard.summary(),
+                    execution_checks=dict(**contacts,
                         action_command_dtype='float32',
                         control_hold_seconds=float(self.sim.dt),
                         max_observed_alignment_error_m=self.max_fit_error,

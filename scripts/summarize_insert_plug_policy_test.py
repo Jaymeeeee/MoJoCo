@@ -128,22 +128,47 @@ def audit_episode(folder, result, *, position, repetition, checkpoint, layout,
         require(isinstance(actual, list) and len(actual) == 2, f'{key} must be a coordinate pair')
         for value, expected in zip(actual, layout[key]):
             close(value, expected, f'{key} differs from vetted fixed position')
-    require(result.get('stop_on_contact') is True, 'stop_on_contact must be true')
-    for key in ('success', 'task_success', 'contact_clean'):
+    for key in ('success', 'task_success'):
         require(type(result.get(key)) is bool, f'{key} must be a boolean')
-    require(result['success'] == (result['task_success'] and result['contact_clean']),
-            'success must combine task_success and contact_clean')
     contacts = result['contacts']
     unsafe = contacts['unsafe_contact_count']
-    require(type(unsafe) is int and unsafe >= 0, 'Invalid unsafe_contact_count')
-    require(result['contact_clean'] == (unsafe == 0), 'Contact count and contact_clean disagree')
+    legacy_contacts = 'contact_policy' not in result and 'enabled' not in contacts
+    if legacy_contacts:
+        require(result.get('stop_on_contact') is True, 'Legacy stop_on_contact must be true')
+        mode, enabled = 'legacy_stop', True
+        require(result['success'] == (result['task_success'] and result.get('contact_clean')),
+                'Legacy success must combine task_success and contact_clean')
+    else:
+        mode = result.get('contact_policy')
+        require(mode in {'off', 'diagnostic', 'stop'}, 'Invalid contact_policy')
+        enabled = mode != 'off'
+        require(contacts.get('enabled') is enabled and result.get('contact_diagnostics') is enabled,
+                'Contact policy and enabled flags disagree')
+        require(result.get('stop_on_contact') is (mode == 'stop'), 'Contact policy and stop_on_contact disagree')
+        expected_success = result['task_success'] and (mode != 'stop' or result.get('contact_clean') is True)
+        require(result['success'] == expected_success, 'Success disagrees with configured contact policy')
+        require(type(result.get('contact_checks')) is int and result['contact_checks'] >= 0,
+                'Invalid contact_checks')
+        require(contacts.get('checks') == result['contact_checks'], 'Contact check counts disagree')
+    if enabled:
+        require(type(result.get('contact_clean')) is bool, 'Enabled contact_clean must be a boolean')
+        require(type(unsafe) is int and unsafe >= 0, 'Invalid unsafe_contact_count')
+        require(result['contact_clean'] == (unsafe == 0), 'Contact count and contact_clean disagree')
+    else:
+        require(result.get('contact_clean') is None and unsafe is None,
+                'Disabled contact diagnostics must remain unknown, not zero/clean')
+        require(result['contact_checks'] == contacts.get('checks') == 0,
+                'Disabled contact diagnostics cannot report checks')
+        require(contacts.get('first_violation') is None and contacts.get('last_violation') is None,
+                'Disabled contact diagnostics cannot report violations')
     reason = result['stop_reason']
     require(reason in PHYSICAL_REASONS | INFRASTRUCTURE_REASONS, f'Unknown stop_reason {reason!r}')
     require(result['success'] == (reason == 'success'), 'Success flag and stop reason disagree')
     require(not result['task_success'] or reason in {'success', 'task_success_with_contact_violations'},
             'task_success and stop reason disagree')
     if reason == 'contact_violation':
-        require(unsafe > 0, 'Contact stop has no unsafe contacts')
+        require(mode in {'legacy_stop', 'stop'} and type(unsafe) is int and unsafe > 0,
+                'Contact stop needs enabled stopping and unsafe contacts')
     if reason == 'runtime_error':
         require(bool(result.get('runtime_error')), 'Runtime error lacks diagnostic')
     elif reason not in {'contact_violation', 'interrupted'}:
@@ -153,7 +178,8 @@ def audit_episode(folder, result, *, position, repetition, checkpoint, layout,
         require(type(result.get(key)) is int and result[key] >= 0, f'Invalid {key}')
     completed, attempted = result['completed_control_steps'], result['attempted_control_steps']
     require(completed <= attempted <= result['selected_actions'], 'Control/action counts disagree')
-    require(contacts.get('checks') == result['physics_checks'], 'Contact/physics check counts disagree')
+    if enabled:
+        require(contacts.get('checks') == result['physics_checks'], 'Contact/physics check counts disagree')
     close(result['simulation_seconds'], result['physics_checks'] * .001,
           'Simulation duration and physics check count disagree', tolerance=1e-7)
     require(0 <= result['simulation_seconds'] <= duration + 1e-7, 'Simulation duration exceeds requested duration')
@@ -191,7 +217,8 @@ def audit_episode(folder, result, *, position, repetition, checkpoint, layout,
         'completed_control_steps', 'physics_checks', 'final_metrics', 'last_action', 'contacts')}
     return dict(video_audit=video, config_sha256=digest(config),
                 scene_sha256=hashlib.sha256(scene_path.read_bytes()).hexdigest(),
-                outcome_sha256=digest(outcome))
+                outcome_sha256=digest(outcome), contact_policy=mode,
+                contact_diagnostics=enabled, contact_checks=contacts.get('checks'))
 
 
 def check_position_summary(folder, rows, checkpoint):
@@ -295,7 +322,8 @@ def summarize_batch(root, *, checkpoint, positions_config=ROOT / 'config/insert_
                 result = load_json(report)
                 for key in ('seed', 'success', 'task_success', 'contact_clean', 'stop_reason',
                             'runtime_error', 'simulation_seconds', 'wall_seconds', 'video_frames',
-                            'completed_control_steps', 'physics_checks'):
+                            'completed_control_steps', 'physics_checks', 'contact_policy',
+                            'contact_diagnostics', 'contact_checks'):
                     row[key] = result.get(key)
                 row['unsafe_contact_count'] = result.get('contacts', {}).get('unsafe_contact_count')
                 row['result_written_at'] = timestamp(report.stat().st_mtime)
@@ -372,16 +400,21 @@ def summarize_batch(root, *, checkpoint, positions_config=ROOT / 'config/insert_
 def totals(rows):
     reasons = Counter(row.get('stop_reason') if isinstance(row.get('stop_reason'), str)
                       else 'unreadable_report' for row in rows)
+    checked = [row for row in rows if type(row.get('contact_clean')) is bool]
+    unsafe_counts = [row.get('unsafe_contact_count', row.get('contacts', {}).get('unsafe_contact_count'))
+                     for row in checked]
     return dict(episodes_completed=len(rows), successes=sum(row.get('success') is True for row in rows),
                 task_successes=sum(row.get('task_success') is True for row in rows),
-                contact_clean=sum(row.get('contact_clean') is True for row in rows),
+                contact_clean=sum(row['contact_clean'] is True for row in checked) if checked else None,
+                contact_diagnostics_episodes=len(checked), contact_unchecked_episodes=len(rows)-len(checked),
+                contact_policy_counts=dict(Counter(row.get('contact_policy') or (
+                    'legacy_stop' if type(row.get('contact_clean')) is bool else 'unknown') for row in rows)),
                 success_rate=sum(row.get('success') is True for row in rows) / len(rows) if rows else None,
                 stop_reasons=dict(sorted(reasons.items())), timeouts=reasons['timeout'],
                 runtime_errors=reasons['runtime_error'], contact_stops=reasons['contact_violation'],
-                contact_violation_episodes=sum(row.get('contact_clean') is False for row in rows),
-                unsafe_contact_count=sum(row['unsafe_contact_count'] for row in rows
-                                         if type(row.get('unsafe_contact_count')) is int
-                                         and row['unsafe_contact_count'] >= 0))
+                contact_violation_episodes=sum(row['contact_clean'] is False for row in checked) if checked else None,
+                unsafe_contact_count=sum(value for value in unsafe_counts
+                                         if type(value) is int and value >= 0) if checked else None)
 
 
 def write_reports(root, summary, rows):
@@ -390,7 +423,8 @@ def write_reports(root, summary, rows):
     require(str(root) == summary['root'], 'Report destination must be the audited batch root')
     fields = ['position', 'repetition', 'episode_index', 'seed', 'success', 'task_success', 'contact_clean',
               'stop_reason', 'runtime_error', 'simulation_seconds', 'wall_seconds', 'completed_control_steps',
-              'physics_checks', 'unsafe_contact_count', 'video_frames', 'result_written_at', 'audit_valid',
+              'physics_checks', 'contact_policy', 'contact_diagnostics', 'contact_checks',
+              'unsafe_contact_count', 'video_frames', 'result_written_at', 'audit_valid',
               'audit_error', 'report', 'scene', 'video', 'config_sha256', 'scene_sha256', 'outcome_sha256']
     for name in ('summary.json', 'episodes.csv'):
         require(not (root / name).is_symlink(), f'Refusing to overwrite symlink {name}')

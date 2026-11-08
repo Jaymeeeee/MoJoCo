@@ -55,6 +55,7 @@ board:
   hole_radius: 0.0055
   hole_segments: 64
   socket_half_width: 0.018
+  # Both holders are fixed world bodies: no joints/free joints or runtime jitter.
   # Task placement: orange/source and green/target. Edit ONLY these two XY
   # positions to relocate the holders; the planner resolves their scene sites.
   source_xy: [0.45, -0.07]
@@ -110,20 +111,32 @@ task:
   peg_head_site: peg_head
   peg_tip_site: peg_tip
   control_hz: 10
-  approach_height: 0.08
-  transport_height: 0.16
-  insertion_duration: 3.0
-  # Slow extraction keeps compliant-pad drift small with 100 ms held targets.
-  extraction_duration: 12.5
+  # Approach relative to the grasp point; transport is absolute TCP height.
+  approach_height: 0.04
+  transport_height: 0.10
+  descent_duration: 1.0
+  transfer_duration: 1.5
+  alignment_duration: 1.2
+  insertion_duration: 2.5
+  # Short smooth ramps followed by cruise: avoids a long nearly-static start.
+  # At ~56 mm travel the peak speed is ~20 mm/s.
+  extraction_profile: cosine_velocity
+  extraction_duration: 4.0
+  extraction_ramp_fraction: 0.3
   # Ten 100 ms opening commands keep the gravity-driven seating gentle.
   release_duration: 1.0
   seating_tolerance: 0.002
   settling_seconds: 0.5
   planning:
-    max_joint_velocity: 0.8
-    max_joint_acceleration: 2.0
-    max_cartesian_velocity: 0.12
-    max_cartesian_acceleration: 0.6
+    # Ordinary grasp/holder contact never aborts collection. Keep real colliders.
+    # Opt-in legacy diagnostics only; not required to generate demonstrations.
+    strict_collision_checks: false
+    max_joint_velocity: 1.4
+    max_joint_acceleration: 4.0
+    max_cartesian_velocity: 0.18
+    # Faster empty-hand approach without speeding up compliant loaded transport.
+    approach_max_cartesian_velocity: 0.24
+    max_cartesian_acceleration: 0.8
     collision_joint_step: 0.015
     collision_cartesian_step: 0.001
     contact_tolerance: 0.00015
@@ -132,9 +145,21 @@ task:
     tracking_rotation_tolerance: 0.0005
     tracking_joint_speed_tolerance: 0.01
     tracking_timeout: 2.0
+    # Count endpoint stability already observed while completing the segment.
+    tracking_stable_seconds: 0.1
+    # No extra endpoint wait at clearance waypoints; contact gates stay active.
+    continuous_free_space: true
+    # Pass the source/target hover waypoints with nonzero downward velocity.
+    continuous_hover: true
+    grasp_approach_speed: 0.02
+    place_approach_speed: 0.008
+    # .8 s is a maximum wait, ending early after 200 ms stable opposed contact.
+    adaptive_grasp_settle: true
     grasp_settle_seconds: 0.8
+    alignment_correction_duration: 0.4
     alignment_margin: 0.00015
     maximum_held_tilt: 0.003
-    insertion_depth: 0.006
+    # Enter 12 mm before release to reduce the remaining gravity-driven drop.
+    insertion_depth: 0.012
     preinsert_clearance: 0.015
-    retract_height: 0.08
+    retract_height: 0.05

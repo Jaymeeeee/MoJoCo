@@ -21,16 +21,20 @@ positions:
       min_edge_margin_px: 58.843
     final:
       all_inside: true
-      min_edge_margin_px: 56.574
+      min_edge_margin_px: 56.57
   physics_check:
     success: true
-    duration_seconds: 39.4
-    control_steps: 394
-    radial_error_m: 4.655938759738923e-05
-    insertion_depth_m: 0.03000001102917105
-    unsafe_contact_count: 0
+    duration_seconds: 19.7
+    control_steps: 197
+    radial_error_m: 3.249862872534328e-05
+    insertion_depth_m: 0.03000001103066214
+    unsafe_contact_count: null
     control_hz: 10
     action_command_dtype: float32
+    physics_checks_complete: null
+    collision_checks_enabled: false
+    contact_checks: 0
+    under_20_seconds: true
 - name: pos1
   source_xy: [0.43, -0.03]
   target_xy: [0.49, 0.05]
@@ -45,13 +49,17 @@ positions:
       min_edge_margin_px: 85.77
   physics_check:
     success: true
-    duration_seconds: 37.9
-    control_steps: 379
-    radial_error_m: 3.4129895823566055e-05
-    insertion_depth_m: 0.030000011030666497
-    unsafe_contact_count: 0
+    duration_seconds: 18.7
+    control_steps: 187
+    radial_error_m: 2.9438053780633215e-05
+    insertion_depth_m: 0.03000001103114255
+    unsafe_contact_count: null
     control_hz: 10
     action_command_dtype: float32
+    physics_checks_complete: null
+    collision_checks_enabled: false
+    contact_checks: 0
+    under_20_seconds: true
 - name: pos2
   source_xy: [0.49, -0.05]
   target_xy: [0.41, 0.07]
@@ -63,16 +71,20 @@ positions:
       min_edge_margin_px: 81.481
     final:
       all_inside: true
-      min_edge_margin_px: 79.834
+      min_edge_margin_px: 79.833
   physics_check:
     success: true
-    duration_seconds: 38.5
-    control_steps: 385
-    radial_error_m: 4.655456627132499e-05
-    insertion_depth_m: 0.030000011029181976
-    unsafe_contact_count: 0
+    duration_seconds: 19.0
+    control_steps: 190
+    radial_error_m: 3.176840251253303e-05
+    insertion_depth_m: 0.030000011030787827
+    unsafe_contact_count: null
     control_hz: 10
     action_command_dtype: float32
+    physics_checks_complete: null
+    collision_checks_enabled: false
+    contact_checks: 0
+    under_20_seconds: true
 - name: pos3
   source_xy: [0.47, -0.05]
   target_xy: [0.47, 0.09]
@@ -84,16 +96,20 @@ positions:
       min_edge_margin_px: 64.336
     final:
       all_inside: true
-      min_edge_margin_px: 61.921
+      min_edge_margin_px: 61.916
   physics_check:
     success: true
-    duration_seconds: 38.3
-    control_steps: 383
-    radial_error_m: 4.7491950397734676e-05
-    insertion_depth_m: 0.030000011029068352
-    unsafe_contact_count: 0
+    duration_seconds: 18.9
+    control_steps: 189
+    radial_error_m: 3.181690064352968e-05
+    insertion_depth_m: 0.030000011030769862
+    unsafe_contact_count: null
     control_hz: 10
     action_command_dtype: float32
+    physics_checks_complete: null
+    collision_checks_enabled: false
+    contact_checks: 0
+    under_20_seconds: true
 - name: pos4
   source_xy: [0.43, -0.09]
   target_xy: [0.47, 0.03]
@@ -108,13 +124,17 @@ positions:
       min_edge_margin_px: 68.438
   physics_check:
     success: true
-    duration_seconds: 38.2
-    control_steps: 382
-    radial_error_m: 4.6564484393094656e-05
-    insertion_depth_m: 0.030000011029161833
-    unsafe_contact_count: 0
+    duration_seconds: 18.8
+    control_steps: 188
+    radial_error_m: 2.9144032387224248e-05
+    insertion_depth_m: 0.03000001103109389
+    unsafe_contact_count: null
     control_hz: 10
     action_command_dtype: float32
+    physics_checks_complete: null
+    collision_checks_enabled: false
+    contact_checks: 0
+    under_20_seconds: true
 - name: pos5
   source_xy: [0.45, -0.05]
   target_xy: [0.41, 0.03]
@@ -129,13 +149,17 @@ positions:
       min_edge_margin_px: 90.363
   physics_check:
     success: true
-    duration_seconds: 38.1
-    control_steps: 381
-    radial_error_m: 4.718320208189232e-05
-    insertion_depth_m: 0.03000001102911299
-    unsafe_contact_count: 0
+    duration_seconds: 18.7
+    control_steps: 187
+    radial_error_m: 3.111301157500849e-05
+    insertion_depth_m: 0.030000011030862778
+    unsafe_contact_count: null
     control_hz: 10
     action_command_dtype: float32
+    physics_checks_complete: null
+    collision_checks_enabled: false
+    contact_checks: 0
+    under_20_seconds: true
 - name: pos6
   source_xy: [0.41, -0.09]
   target_xy: [0.45, 0.11]
@@ -147,16 +171,20 @@ positions:
       min_edge_margin_px: 54.235
     final:
       all_inside: true
-      min_edge_margin_px: 51.734
+      min_edge_margin_px: 51.728
   physics_check:
     success: true
-    duration_seconds: 39.1
-    control_steps: 391
-    radial_error_m: 4.6349481289584615e-05
-    insertion_depth_m: 0.0300000110291721
-    unsafe_contact_count: 0
+    duration_seconds: 19.3
+    control_steps: 193
+    radial_error_m: 2.9043886844383113e-05
+    insertion_depth_m: 0.030000011031137037
+    unsafe_contact_count: null
     control_hz: 10
     action_command_dtype: float32
+    physics_checks_complete: null
+    collision_checks_enabled: false
+    contact_checks: 0
+    under_20_seconds: true
 - name: pos7
   source_xy: [0.45, -0.11]
   target_xy: [0.41, 0.05]
@@ -171,13 +199,17 @@ positions:
       min_edge_margin_px: 54.235
   physics_check:
     success: true
-    duration_seconds: 38.8
-    control_steps: 388
-    radial_error_m: 4.6278999845792274e-05
-    insertion_depth_m: 0.03000001102922035
-    unsafe_contact_count: 0
+    duration_seconds: 19.2
+    control_steps: 192
+    radial_error_m: 3.107927065894585e-05
+    insertion_depth_m: 0.03000001103085454
+    unsafe_contact_count: null
     control_hz: 10
     action_command_dtype: float32
+    physics_checks_complete: null
+    collision_checks_enabled: false
+    contact_checks: 0
+    under_20_seconds: true
 - name: pos8
   source_xy: [0.41, -0.05]
   target_xy: [0.45, 0.03]
@@ -192,13 +224,17 @@ positions:
       min_edge_margin_px: 92.638
   physics_check:
     success: true
-    duration_seconds: 37.7
-    control_steps: 377
-    radial_error_m: 4.587326282101269e-05
-    insertion_depth_m: 0.03000001102926938
-    unsafe_contact_count: 0
+    duration_seconds: 18.6
+    control_steps: 186
+    radial_error_m: 2.8905076717131378e-05
+    insertion_depth_m: 0.030000011031052286
+    unsafe_contact_count: null
     control_hz: 10
     action_command_dtype: float32
+    physics_checks_complete: null
+    collision_checks_enabled: false
+    contact_checks: 0
+    under_20_seconds: true
 - name: pos9
   source_xy: [0.49, -0.03]
   target_xy: [0.47, 0.05]
@@ -213,22 +249,32 @@ positions:
       min_edge_margin_px: 85.77
   physics_check:
     success: true
-    duration_seconds: 38.1
-    control_steps: 381
-    radial_error_m: 4.730395221655043e-05
-    insertion_depth_m: 0.030000011029086105
-    unsafe_contact_count: 0
+    duration_seconds: 19.0
+    control_steps: 190
+    radial_error_m: 3.196762817129489e-05
+    insertion_depth_m: 0.030000011030736504
+    unsafe_contact_count: null
     control_hz: 10
     action_command_dtype: float32
+    physics_checks_complete: null
+    collision_checks_enabled: false
+    contact_checks: 0
+    under_20_seconds: true
 rejected_candidates:
   duplicate_position: 9
   geometry_or_planning: 0
   outside_view: 0
   execution: 0
 selection_complete: true
-base_config_sha256: da969b1727744def228b21ba58da873f7eb463a8c9d052336118cf42d4105934
+base_config_sha256: b3a1932e9b4d283479b5c0959726b51ca168f843f7c9ca69d1038ff22da98826
 visibility_method: all compiled visual mesh vertices projected into head optical camera
 occlusion_checked: false
 control_hz: 10
 action_hold_duration_s: 0.1
 action_command_dtype: float32
+revalidation:
+  expert: under20_v1
+  date: '2026-11-08'
+  report: outputs/_checks/insert_plug_under20/summary.json
+  layouts_changed: false
+  old_datasets_preserved: true

@@ -52,13 +52,14 @@ python -m examples.insert_plug plan --output outputs/insert_plug/plans
 python -m examples.insert_plug demo --backend glfw --viewer --realtime
 
 # 先规划检查，再执行并保存 512×512 双相机观测与视频
-python -m examples.insert_plug demo --backend egl --width 512 --output outputs/datasets/insert_plug/planned_transfer --video
+python -m examples.insert_plug demo --backend egl --width 512 --output outputs/datasets/insert_plug/under20_demo --video
 
 # 无图像物理检查；产物属于可自动清理的临时结果
 python -m examples.insert_plug demo --no-images
 
 # 按当前固定底座位置采集 10 条，每条默认附带第三视角 MP4
-python -m examples.insert_plug collect --backend egl --episodes 10 --randomize-mm 0
+python -m examples.insert_plug collect --backend egl --episodes 10 --randomize-mm 0 \
+  --output outputs/datasets/insert_plug/under20_fixed_v1
 
 # 需要随机孔位时显式设置随机范围
 python -m examples.insert_plug collect --backend egl --episodes 10 --seed 200 --randomize-mm 2
@@ -71,7 +72,7 @@ python -m examples.insert_plug validate outputs/datasets/insert_plug/pos0/episod
 python -m examples.insert_plug preview outputs/datasets/insert_plug/pos0/episode_000000/episode_000000.h5 --output outputs/insert_plug/replay.mp4
 ```
 
-每条记录默认生成同名 `.mp4`，只包含第三视角 `head` RGB，以 HDF5 的采样频率播放（默认 10 fps），不叠字、不缩放，帧数与 HDF5 一致。带 `--video` 的上述命令还会额外将双视角视频另存到 `outputs/insert_plug/previews/planned_transfer/preview.mp4`。额外视频左侧为 Head (third-person)，右侧为 Wrist；独立黑色页眉显示相机名称、记录的仿真时间和当前阶段。已有 episode 和视频不会覆盖，也不会随当前配置自动更新；重复执行这条命令请改用新的输出目录。
+每条记录默认生成同名 `.mp4`，只包含第三视角 `head` RGB，以 HDF5 的采样频率播放（默认 10 fps），不叠字、不缩放，帧数与 HDF5 一致。带 `--video` 的上述命令还会额外将双视角视频另存到 `outputs/insert_plug/previews/under20_demo/preview.mp4`。额外视频左侧为 Head (third-person)，右侧为 Wrist；独立黑色页眉显示相机名称、记录的仿真时间和当前阶段。已有 episode 和视频不会覆盖，也不会随当前配置自动更新；重复执行这条命令请改用新的输出目录。
 
 省略 `--output` 时，`demo` 与 `collect` 都保存到 `outputs/datasets/insert_plug/run_<时间>/`；指定 `--output` 时使用该批次目录。每个 episode 必须放在独立的 `episode_<seed>/` 子目录中，内部保留同名 `.h5`、`.yaml`、`.xml`、`.mp4` 四个文件。历史 15 Hz 固定位置测试批保留在 `outputs/datasets/insert_plug/test/`，结构如下：
 
@@ -96,20 +97,23 @@ test/
 
 批量布局在 `config/insert_plug_positions.yaml` 中定义，包含基础配置路径及 SHA256、2 cm 网格间距、10 组 `source_xy`/`target_xy` 和整数偏移 `source_steps`/`target_steps`。当前选择范围为相对于基准位置的每轴 ±4 cm，各组源底座和目标底座的位置都分别唯一；每个位置内部固定采集 10 条，不加连续随机扰动。
 
-位置筛选读取实际编译后的 STL 视觉网格全部顶点，检查两底座和初始、最终零件是否落在第三视角视锥内，并保留至少 5 px 边缘余量。每组还完成规划预检和完整物理预执行，清单中保留简洁检查结果。采集过程中继续运行原有阶段条件与接触检查。
+位置筛选读取实际编译后的 STL 视觉网格全部顶点，检查两底座和初始、最终零件是否落在第三视角视锥内，并保留至少 5 px 边缘余量。每组还完成规划预检和完整物理预执行，清单中保留简洁检查结果。清单按当前专家配置验证并更新基础配置 SHA256，十组底座坐标没有变化。默认采集保留抓稳、到位和任务完成条件；普通接触由 MuJoCo 处理，不运行附加接触阈值中止。
 
 ```bash
 # 10 组位置，每组 10 条，控制/记录均为 10 Hz、双路 RGB-D、第三视角 MP4
-python scripts/collect_insert_plug_positions.py --workers 3
+python scripts/collect_insert_plug_positions.py --workers 3 \
+  --output outputs/datasets/insert_plug/under20_v1
 
 # 可单独选择某组；重复运行会校验并跳过同配置的成功记录
-python scripts/collect_insert_plug_positions.py --position pos0 --workers 1
+python scripts/collect_insert_plug_positions.py --position pos0 --workers 1 \
+  --output outputs/datasets/insert_plug/under20_v1
 
 # 整批完成后，检查位置、频率、深度、动作时序和视频
-python scripts/audit_insert_plug_batch.py --positions-config config/insert_plug_positions.yaml
+python scripts/audit_insert_plug_batch.py --positions-config config/insert_plug_positions.yaml \
+  --root outputs/datasets/insert_plug/under20_v1
 ```
 
-本次保持原来的十组布局，每组全新采集十条，替换旧的 50 Hz 控制／10 Hz 记录批次。十组已按当前 10 Hz 控制、10 Hz 记录、1 kHz 物理参数完成物理预执行；新批次已完成 **100/100 条成功采集，共 38,410 帧、400 个文件，约 13.64 GB**，并通过整批独立审计和保存动作物理回放。初始和最终实际 STL 视觉网格相对第三视角画面边缘的最小余量为 51.694 px。输出结构为：
+上述命令为后续平滑专家采集预留独立的 `under20_v1/` 目录，不会覆盖现有训练数据。当前保留的 100 条来自先前专家，采用 10 Hz 控制、10 Hz 记录、1 kHz 物理，并曾替换更早的 50 Hz 控制／10 Hz 记录批次。该历史批次 **100/100 条成功，共 38,410 帧、400 个文件，约 13.64 GB**，采集时通过整批独立审计和保存动作物理回放；初始和最终视觉网格的画面边缘最小余量为 51.694 px。这些数字不代表当前平滑专家已经重新采集 100 条。历史记录结构为：
 
 ```text
 outputs/datasets/insert_plug/
@@ -127,7 +131,7 @@ outputs/datasets/insert_plug/
     └── episode_000090/ ... episode_000099/
 ```
 
-`pos{i}` 使用全局编号 `i*10` 至 `i*10+9`。基础配置和批量清单的控制、记录频率均为 10 Hz，批量采集开启两路深度；原 `test/` 中的历史 15 Hz 记录保持原样。每条 HDF5 和 YAML 都保存本次实际配置与所属位置；每条动作在采样时生效，并保持至 100 ms 后的下一次观测。
+`pos{i}` 使用全局编号 `i*10` 至 `i*10+9`。新命令使用相同子目录结构，但位于 `outputs/datasets/insert_plug/under20_v1/` 下。基础配置和批量清单的控制、记录频率均为 10 Hz，批量采集开启两路深度；原 `test/` 中的历史 15 Hz 记录保持原样。每条 HDF5 和 YAML 都保存本次实际配置与所属位置；每条动作在采样时生效，并保持至 100 ms 后的下一次观测。
 
 安全续采仅接受四个文件齐全、HDF5 校验成功且 YAML 配置完全一致的已有记录。遇到缺失文件、失败轨迹或配置不同会停止并保留现有内容。基础配置 SHA256 若与清单不一致，也会拒绝启动，避免使用过时的位置预检结果。
 
@@ -138,7 +142,7 @@ python -m examples.insert_plug.layouts --config config/insert_plug.yaml --output
 python scripts/collect_insert_plug_positions.py --positions-config config/insert_plug_positions_new.yaml --output outputs/datasets/insert_plug/new_positions --workers 3
 ```
 
-布局生成器默认不覆盖已有清单；`--position` 可重复指定以选择多个位置。新批次的 100 条原始 HDF5 通过下述独立转换步骤合并为 LeRobotDataset，原始四类文件仍保留。
+布局生成器默认不覆盖已有清单；`--position` 可重复指定以选择多个位置。后续新批次完成后，可通过下述独立转换步骤合并为 LeRobotDataset，原始四类文件仍保留。
 
 ## 10 Hz 动作物理回放检查
 
@@ -158,39 +162,68 @@ env -u PYTHONPATH python scripts/check_insert_plug_action_replay.py \
 
 报告中的 `task_success` 要求完整执行、最终落座条件通过，并在最后 250 ms 的 251 个物理时刻全部稳定；稳定性指标在独立 `MjData` 副本上刷新计算。`contact_clean` 表示全程无接触检查违规，接触监测不依赖原阶段标签，也不中止回放；总 `success` 要求两者同时成立。
 
-当前新批次的 100 条均通过独立物理重放：`task_success`、`contact_clean` 和总 `success` 全部为真；相同时间的关节及插销位置与原记录最大偏差均为零，最后 250 ms 的 251 个物理时刻全部满足成功条件。这是保存动作的执行一致性检查，不是训练后 ACT 的成功率。
+保留的先前专家 100 条记录均通过独立物理重放：`task_success`、`contact_clean` 和总 `success` 全部为真；相同时间的关节及插销位置与原记录最大偏差均为零，最后 250 ms 的 251 个物理时刻全部满足成功条件。这是历史保存动作的执行一致性检查，不是平滑专家新数据的整批结果，也不是训练后 ACT 的成功率。
 
-历史结果：2026-11-07 对被本次重采替换的旧批次（50 Hz 专家控制、10 Hz 记录）检查时，100 次稀疏动作物理回放中有 90 次最终完成插入，`pos6` 的十次均未完全落座；100 次都出现超过原阈值的孔壁／孔口接触，严格总通过数为零。每组十条保存的动作相同，共覆盖十种轨迹。原 50 Hz 专家参考运行能复现成功终态且接触零违规，`pos0`、`pos6` 改用原始 float64 动作也未消除稀疏回放问题。该历史结果说明稀疏保存动作不能恢复原来的中间控制更新，**不是当前 10 Hz 控制／10 Hz 记录新批次的回放结果，也不是 ACT 成功率**。当前新批次的结果应以完成采集后的独立回放报告为准。
+更早的结果：2026-11-07 对随后被重采替换的旧批次（50 Hz 专家控制、10 Hz 记录）检查时，100 次稀疏动作物理回放中有 90 次最终完成插入，`pos6` 的十次均未完全落座；100 次都出现超过原阈值的孔壁／孔口接触，严格总通过数为零。每组十条保存的动作相同，共覆盖十种轨迹。原 50 Hz 专家参考运行能复现成功终态且接触零违规，`pos0`、`pos6` 改用原始 float64 动作也未消除稀疏回放问题。该历史结果说明稀疏保存动作不能恢复原来的中间控制更新，**不是保留的 10 Hz 控制／10 Hz 记录批次的回放结果，也不是 ACT 成功率**。未来新批次仍应在完成采集后独立回放验证。
 
 ## 规划与执行
 
-两个放置桶的平面位置只由 `config/insert_plug.yaml` 中的 `board.source_xy`（橙色源孔）和 `board.target_xy`（绿色目标孔）定义。调整布局时修改这两个配置项，规划器从生成场景的 site 读取位置；不需要另传一组目标坐标。`collect` 默认 `--randomize-mm 0`，使用固定布局；显式设置非零范围时，通过修改每个 episode 的这两个配置项生成随机布局。
+两个放置桶固定在世界坐标系中，没有 joint、freejoint 或 mocap，不会被碰撞推走。平面位置只由 `config/insert_plug.yaml` 中的 `board.source_xy`（橙色源孔，默认 `[0.45, -0.07]`）和 `board.target_xy`（绿色目标孔，默认 `[0.45, 0.07]`）定义，单位米。调整布局时修改这两个配置项，规划器从生成场景的 site 读取位置；不需要另传一组目标坐标。`collect` 默认 `--randomize-mm 0`，同一 episode 中位置始终固定；显式设置非零范围才会在创建各 episode 时改变布局。
 
-`plan` 在独立的 `MjData` 中生成任务约束下的笛卡尔五次轨迹与姿态插值，以上一采样点的关节解为种子逐点求解 IK，并按关节速度、加速度限制调整时长。它使用实际模型的机器人、原生夹爪连杆和零件碰撞体，对初始状态、各控制采样点及加密插值点进行碰撞预检。默认加密阈值为关节 0.015 rad、笛卡尔位移 1 mm；这是密集采样的运动学检查，不是通用 RRT／全局避障搜索，也不构成数学上的连续无碰撞保证或接触动力学预测。选定通道被阻挡或位姿不可达时规划失败，需调整配置布局或任务高度。
+`plan` 在独立的 `MjData` 中生成任务约束下的平滑笛卡尔轨迹与姿态插值，以上一采样点的关节解为种子逐点求解 IK，并按关节速度、加速度限制调整时长。默认提起使用余弦速度加减速与匀速段；抓取点、目标上方路点的连接采用指定端点速度、零端点加速度的五次 Hermite 曲线，其余段使用平滑五次曲线。重定时检查各段的笛卡尔及关节运动界限。默认 `task.planning.strict_collision_checks=false`，仅做 IK、运动界限及任务几何检查，不按采样碰撞阈值拒绝轨迹。执行时保留原碰撞体、摩擦和接触求解，不能把规划成功理解为无障碍保证。显式开启该选项才运行旧的密集碰撞诊断；它也不是通用 RRT／全局避障搜索或连续无碰撞证明。
 
 独立 `plan` 命令保存 `nominal_trajectory.json` 和 `nominal_trajectory.npz`：JSON 包含阶段位姿、时长、边界和检查信息；NPZ 保存时间、关节目标、夹爪开口、TCP 位姿、阶段及动作数组。规划过程不推进实际仿真，不生成采集 HDF5。
 
 `demo` 和 `collect` 自动先对完整名义任务预检，成功后才开始执行和打开数据写入器。执行分为以下步骤：
 
-1. 按名义轨迹完成初始稳定、接近、下降与夹持。
+1. 按名义轨迹完成初始稳定、接近、下降与夹持；通过抓取点上方时保持向下速度，不停稳后再下降。
 2. 双指夹持稳定后，重新测量零件相对 TCP 的完整 SE(3) 变换，包括位置和旋转；据此重规划并检查拔出、搬运及后续轨迹。
-3. 搬运到目标孔上方后再次测量夹持变换，重规划对准及插入后缀。若对准未通过插入条件，最多增加两次修正；所有横向修正都在孔口上方完成，默认预插入间距为 15 mm，不在孔内反复试探。
+3. 到目标上方时再次测量实际夹持变换，后续对准命令从上一条目标的位姿和速度接续，避免从滞后的实际位姿重新零速起步。搬运、对准和浅插连续向下衔接，默认预插入间距为 15 mm。进入浅插前即时核对孔轴匹配；默认连续模式若不满足则报告失败，不执行停住再纠偏的循环。显式关闭 `continuous_hover` 才保留旧的最多两次额外对准修正。
 4. 通过插入条件后浅插、检查深度、松爪、撤离，最后检查自由落座稳定性。
 
-默认 `task.extraction_duration=12.5` 秒、`task.release_duration=1.0` 秒，在真实 10 Hz 控制下减小拔出时的柔性夹持漂移，并让松爪更平缓；布局、碰撞容差和插入精度阈值保持不变。规划的加密碰撞检查只发生在独立运动学工作区，执行时每个目标仍恒定保持 100 ms。
+当前默认专家连续通过抓取点、放置点上方，降低搬运高度，并按完整任务少于 20 秒调整速度与阶段时长：
 
-采集过程中仍会完成上述规划和检查，但默认不导出 `episode_<seed>_plan/`、结果 JSON 或汇总 JSON。阶段检查、执行接触统计和结果存入 HDF5 元数据 `execution_result`，最终误差另在 `final_metrics` 中记录；控制台继续输出运行结果。实际经过的等待、修正和动作以 HDF5 的时间戳与阶段为准。需要检查独立的名义计划数组时，可显式运行 `plan` 命令导出到 `outputs/insert_plug/plans/`。
+| 参数 | 默认行为 |
+|---|---|
+| `task.approach_height` | 抓取点上方 0.04 m；这是相对抓取点的高度 |
+| `task.transport_height` | TCP 离桌面 0.10 m；这是世界坐标绝对高度，没有额外隐藏的 0.07 m 提起下限 |
+| `task.extraction_profile`、`extraction_duration`、`extraction_ramp_fraction` | `cosine_velocity`、4 秒、0.3；两端加减速各占 30%，中间匀速 |
+| `task.descent_duration`、`transfer_duration`、`alignment_duration`、`insertion_duration` | 下降抓取 1.0 秒、搬运 1.5 秒、对准 1.2 秒、浅插 2.5 秒；运动界限可要求延长 |
+| `task.planning.max_joint_velocity`、`max_joint_acceleration` | 关节速度上限 1.4 rad/s、加速度上限 4 rad/s² |
+| `task.planning.max_cartesian_velocity`、`max_cartesian_acceleration` | 笛卡尔速度上限 0.18 m/s、加速度上限 0.8 m/s² |
+| `task.planning.approach_max_cartesian_velocity` | 仅空载接近段允许 0.24 m/s，持物搬运仍受上述默认上限约束 |
+| `task.planning.continuous_hover` | 开启；抓取上方、目标上方和预插入边界保持非零向下速度，不附加停稳等待 |
+| `task.planning.grasp_approach_speed`、`place_approach_speed` | 上方路点向下速度分别为 0.02 m/s、0.008 m/s |
+| `task.planning.adaptive_grasp_settle`、`grasp_settle_seconds` | 开启条件等待，0.8 秒为最长额外等待；双指稳定接触至少 200 ms 后继续 |
+| `task.planning.tracking_stable_seconds` | 实际抓取和浅插终点稳定观察跨度为 0.1 秒，计入已有稳定观测 |
+| `task.planning.continuous_free_space` | 提起和撤离不追加精确停稳等待；实际净空和最终完成条件保留 |
+| `task.planning.alignment_correction_duration` | 旧的非连续模式中，小于 2 mm 的重测修正最短 0.4 秒；默认连续模式不使用停住纠偏 |
+| `task.planning.insertion_depth` | 浅插 12 mm 后松爪 |
+| `task.planning.retract_height` | 释放后从浅插 TCP 位置上移 0.05 m |
+| `task.release_duration`、`task.settling_seconds` | 松爪 1 秒，末尾检查 0.5 秒 |
+| `task.planning.strict_collision_checks` | 默认关闭附加碰撞阈值预检及执行中止；真实接触仍由 MuJoCo 求解 |
+
+仍采用真实 10 Hz 控制，每个目标恒定保持 100 ms；没有插入隐含的高频目标。抓稳和插入精度条件保留；默认不创建 `MotionGuard`、不扫描附加接触阈值。计算重规划期间不推进仿真，也不增加记录中的等待帧。
+
+当前默认在原十个固定布局各验证一次，**10/10 完成**，共 1,899 个控制步，执行时长 **18.6–19.7 秒、平均 18.99 秒**，全部少于 20 秒。十个布局的 `alignment_corrections` 均为 0，approach、transfer、align 段均没有重复保持指令。pos0 抓取上方交接前后实际速度约 22–24 mm/s，目标上方及预插入处保持约 8 mm/s 的连续下移。持物 TCP 峰值约 0.104 m，搬运时插销尖端距孔口约 0.026 m。见[当前验证报告](../../outputs/_checks/insert_plug_under20/summary.json)与[双视角示例](../../outputs/insert_plug/previews/under20.mp4)。这是已验证布局上的时长，改变位置、物体或参数后应重新验证。
+
+默认场景 YAML 的固定底座位置另完成 **18.9 秒、189 帧、10 Hz** 的真实双路 RGB-D 录制和第三视角 MP4 审计。独立执行保存的动作、每条恒定保持 100 ms 后，任务成功，关节与插销状态相对记录的最大偏差均为零；双视角视频完整解码 189 帧，82 项回归测试通过。证据见[录制审计](../../outputs/_checks/insert_plug_under20/recording_validation.json)与[保存动作回放](../../outputs/_checks/insert_plug_under20/recorded_action_replay.json)。一次性原始试录文件清理，仅保留报告和视频。
+
+上一版连续路点专家平均 24.42 秒，报告与视频保留在 [insert_plug_continuous_hover](../../outputs/_checks/insert_plug_continuous_hover/summary.json) 和 [continuous_hover.mp4](../../outputs/insert_plug/previews/continuous_hover.mp4)。再前一版平滑专家平均 30.3 秒，保留训练批次平均 38.41 秒。旧平滑版的[严格模式报告](../../outputs/_checks/insert_plug_smooth_expert/summary.json)、[关闭附加接触中止的报告](../../outputs/_checks/insert_plug_smooth_expert/contact_response/summary.json)及 [smooth_expert.mp4](../../outputs/insert_plug/previews/smooth_expert.mp4)均为历史对照；旧版 313 帧 RGB-D 试录、精确动作回放和 75 项回归测试也属于当时的验证。当前更新未改写已有 100 条数据、LeRobot 数据、checkpoint 或策略测试，不代表已重训 ACT 或提升模型成功率。抓稳、对准、插入和最终稳定要求均保留；默认接触诊断仍关闭，相关字段为 disabled/null，不声明“零违规接触”。
+
+采集过程中仍会完成上述规划和任务条件检查，但默认不导出 `episode_<seed>_plan/`、结果 JSON 或汇总 JSON。阶段检查、执行结果和是否启用接触诊断存入 HDF5 元数据 `execution_result`，最终误差另在 `final_metrics` 中记录；控制台继续输出运行结果。实际经过的等待、修正和动作以 HDF5 的时间戳与阶段为准。需要检查独立的名义计划数组时，可显式运行 `plan` 命令导出到 `outputs/insert_plug/plans/`。
 
 执行器在阶段间检查实际状态，默认条件如下：
 
 | 检查 | 进入下一阶段的条件 |
 |---|---|
-| 到位与静止 | TCP 位置误差不超过 50 μm、姿态误差不超过 0.5 mrad、最大关节速度不超过 0.01 rad/s；默认连续三次控制检查通过，观察跨度 200 ms |
+| 实际抓取与浅插终点 | 下降抓取及浅插结束仍要求 TCP 位置误差不超过 50 μm、姿态误差不超过 0.5 mrad、最大关节速度不超过 0.01 rad/s；连续稳定观察跨度至少 100 ms，已有稳定观测可计入 |
+| 上方路点与自由空间 | 抓取上方、搬运到目标及预插入边界连续通过，不等待零速停稳；提起后插销尖端仍须实际高于两孔口至少 15 mm，撤离后检查最终成功 |
 | 夹持稳定 | 两侧指垫连续接触至少 200 ms，期间零件相对 TCP 的位置漂移不超过 0.2 mm |
 | 插入几何 | 在预期落座高度与孔口高度检查整段杆轴；默认径向间隙 0.5 mm 减去 0.15 mm 余量，轴线偏差须小于 0.35 mm，零件倾角不超过 0.003 rad |
-| 松爪与撤离 | 达到配置的浅插深度后才能松爪；确认指垫脱离且开口足够后才能撤离 |
+| 松爪与撤离 | 达到配置的浅插深度（默认 12 mm）后才能松爪；确认指垫脱离且开口足够后才能撤离 |
 
-`MotionGuard` 在每个物理子步检查实际接触，默认频率 1 kHz。它按阶段区分允许的指垫压缩和螺栓头在桶口的向上支撑；杆身撞击孔壁／桶口超过夹具容差（默认 50 μm）、机器人或夹爪撞击夹具等违规接触会中止执行。检查不会修改零件位姿、接触掩码或约束。到位、夹持或插入条件失败也会停止当前任务，不通过放宽间隙继续执行。
+默认不因插销碰到孔壁、孔口或夹爪接触而中止；这些接触由 MuJoCo 自身的动力学处理。`task.planning.strict_collision_checks=true` 仅用于显式复现旧严格诊断，会启用逐物理步 `MotionGuard` 和离线碰撞阈值检查；默认无需开启。到位、实际夹持或插入条件失败仍可使专家停止当前任务，非法动作和数值异常也不会被忽略。碰撞掩码、约束和零件自由度不因关闭附加诊断而改变。
 
 ## 物理与控制
 
@@ -222,7 +255,7 @@ env -u PYTHONPATH python scripts/check_insert_plug_action_replay.py \
 
 `snapshot` 同时导出 `head.png`、`wrist.png`、`head_depth.npy`、`wrist_depth.npy`、带米制色标的 `depth_preview.png` 和 `calibration.json`。深度预览仅对显示范围做截断，原始 NPY/HDF5 数值不变。这是 RGB-D 采集支持；LeRobot ACT 默认 RGB 骨干仍需额外的深度预处理/编码融合适配才能使用深度，当前没有把深度自动接入训练。
 
-每个完成的采集 episode 保留同名 HDF5、配置 YAML、场景 XML 和第三视角 MP4；结果保存在 HDF5 元数据中，不另存 JSON、PNG 或规划文件。记录时 RGB、深度、机器人状态与动作共享真实仿真时间戳；默认采样和专家控制均为 10 Hz，以 1 kHz 推进物理并检查接触。`--no-images` 仅执行物理检查，不生成 HDF5 或视频。
+每个完成的采集 episode 保留同名 HDF5、配置 YAML、场景 XML 和第三视角 MP4；结果保存在 HDF5 元数据中，不另存 JSON、PNG 或规划文件。记录时 RGB、深度、机器人状态与动作共享真实仿真时间戳；默认采样和专家控制均为 10 Hz，以 1 kHz 推进接触动力学。`--no-images` 仅执行物理过程，不生成 HDF5 或视频。
 
 当前 10 Hz 采样间隔正好对应 100 个 1 ms 物理步，时间戳为 `0.000、0.100、0.200…` 秒。记录器保留真实仿真时间，元数据记录采样频率、控制频率、物理步长与采样时序约定。历史 `test/` 的 15 Hz 采样使用最近的真实物理步，因此可见 `0.000、0.067、0.133、0.200` 秒等 66/67 ms 间隔，相对理想采样时刻的误差不超过 0.5 ms。
 
@@ -243,11 +276,11 @@ env -u PYTHONPATH python scripts/check_insert_plug_action_replay.py \
 
 写入中使用 `.h5.partial`，完成后才发布 `.h5`。完整名义预检失败时尚未创建采集文件；执行中被规划或安全检查中止的轨迹保留并标记失败原因。训练前按 `success` 筛选，并显式选择可用观测，避免把物体真值当作视觉策略输入。
 
-以上是本场景的原始 HDF5 格式；新批次的 100 条通过下述步骤另行转换为 LeRobotDataset。视频回放播放记录帧，不重新计算物理。训练后的策略可使用 `Simulation.observe()` 和 `Simulation.step(action)` 接入。
+以上是本场景的原始 HDF5 格式；完整的十布局批次可通过下述步骤另行转换为 LeRobotDataset。视频回放播放记录帧，不重新计算物理。训练后的策略可使用 `Simulation.observe()` 和 `Simulation.step(action)` 接入。
 
 ### LeRobot 转换与 ACT 输入
 
-新批次已合并到 `outputs/datasets/insert_plug/lerobot/`，包含 **100 条、38,410 帧、10 Hz，约 11.65 GB**。旧 100 条原始记录及其 LeRobot 数据已删除并原位替换；全部动作、状态、时间戳、阶段及深度像素逐帧校验通过，动作 float32 转换无损，最终目录也已通过官方读取器验证。转换使用官方 **LeRobot 0.7.0** 的 `LeRobotDataset.create/add_frame/save_episode/finalize` API，写入 [LeRobot v3 格式](https://huggingface.co/docs/lerobot/lerobot-dataset-v3)，仅在本机保存。源 HDF5 保留完整仿真状态和逐帧重建腕部外参所需的信息。
+先前专家的历史批次已合并到 `outputs/datasets/insert_plug/lerobot/`，包含 **100 条、38,410 帧、10 Hz，约 11.65 GB**，保持原样。它此前替换的是更早的 50 Hz 控制批次，不会因为本次专家优化再次删除或更新。该历史转换的全部动作、状态、时间戳、阶段及深度像素逐帧校验通过，动作 float32 转换无损，最终目录也已通过官方读取器验证。转换使用官方 **LeRobot 0.7.0** 的 `LeRobotDataset.create/add_frame/save_episode/finalize` API，写入 [LeRobot v3 格式](https://huggingface.co/docs/lerobot/lerobot-dataset-v3)，仅在本机保存。源 HDF5 保留完整仿真状态和逐帧重建腕部外参所需的信息。
 
 ```text
 lerobot/
@@ -273,10 +306,10 @@ LeRobot 自带 `timestamp` 是本 episode 的 `frame_index / fps`；原时间另
 ```bash
 conda activate lerobot
 cd ~/Projects/mujoco
-# 目标目录须尚不存在；重跑请为 --output 指定一个新目录
+# 先完成 under20_v1 的十布局采集；目标转换目录须尚不存在
 python scripts/export_insert_plug_lerobot.py \
-  --source-root outputs/datasets/insert_plug \
-  --output outputs/datasets/insert_plug/lerobot
+  --source-root outputs/datasets/insert_plug/under20_v1 \
+  --output outputs/datasets/insert_plug/under20_v1/lerobot
 
 # 仅在其他机器重建转换环境时执行
 conda env create -f environment-lerobot.yml
@@ -284,7 +317,7 @@ conda activate lerobot
 python -m pip install -r requirements-lerobot-lock.txt
 ```
 
-转换逐帧读取原始 HDF5，先写 `.partial` 目录，校验后发布；已有目标目录不会覆盖。默认只扫描 `pos0` 至 `pos9`，不混入旧 `test/` 数据。官方读取示例：
+转换逐帧读取原始 HDF5，先写 `.partial` 目录，校验后发布；已有目标目录不会覆盖。默认只扫描指定根目录下的 `pos0` 至 `pos9`，不混入旧 `test/` 数据。下面读取的是保留的历史数据：
 
 ```python
 from pathlib import Path
@@ -324,7 +357,7 @@ policy = make_policy(config, ds_meta=dataset.meta)  # 仅初始化，尚未训�
 
 ### 每条轨迹的长度与空间占用
 
-当前十布局每条执行 37.7–39.4 秒，控制与记录均为 10 Hz，每条 377–394 帧，100 条合计 38,410 帧。双路 RGB-D 均为 256×256；原始四文件记录合计 13,640,790,169 字节（约 13.64 GB），对应 LeRobot 数据约 11.65 GB。原始每条平均约 136.4 MB；文件大小随画面、轨迹长度和压缩效果变化。
+保留的先前专家十布局数据每条执行 37.7–39.4 秒，控制与记录均为 10 Hz，每条 377–394 帧，100 条合计 38,410 帧。双路 RGB-D 均为 256×256；原始四文件记录合计 13,640,790,169 字节（约 13.64 GB），对应 LeRobot 数据约 11.65 GB。原始每条平均约 136.4 MB。当前 20 秒以内的专家十布局验证时长为 18.6–19.7 秒，对应默认 10 Hz 下每条 186–197 帧；新数据实际大小仍取决于画面与压缩效果，不能沿用历史总大小。
 
 ## ACT 策略部署
 
@@ -367,7 +400,9 @@ sim.step(action)  # 一次 100 ms；持续循环直到成功、超时或异常
 
 当前 checkpoint 的 `chunk_size=100` 保留；本任务 YAML 默认覆盖 `n_action_steps=50`，依次执行 50 个不同动作，5 秒后重新预测；每个动作仍只保持 100 ms。设为 1 可每 100 ms 根据最新观测预测。通用适配器的构造器缺省值仍为 1，任务 YAML 显式选择 50；选择执行长度应对比物理成功率。
 
-输出默认在 `outputs/insert_plug/rollouts/run_<时间>/`，与训练数据分开，已有目录拒绝覆盖。每条轨迹保留视频、实际场景/配置和执行报告，总报告记录模型路径、版本、动作时序、推理耗时、停止原因与接触诊断。策略控制完全通过执行器与物理积分，运行中不使用专家补救、IK 修正或位姿瞬移。每个 1 ms 物理步监控接触；默认违规即停止，`--continue-on-contact` 可保留完整诊断过程但不会把违规轨迹计为成功。成功需插入到位、松爪、末端撤离且物体稳定连续至少 0.25 秒，进程全部成功返回 0，否则返回 2。
+输出默认在 `outputs/insert_plug/rollouts/run_<时间>/`，与训练数据分开，已有目录拒绝覆盖。每条轨迹保留视频、实际场景/配置和执行报告，总报告记录模型路径、版本、动作时序、推理耗时、停止原因及接触诊断模式。策略控制完全通过执行器与物理积分，运行中不使用专家补救、IK 修正或位姿瞬移。默认 `contact_diagnostics=false`、`stop_on_contact=false`，不创建 `ReplayContactMonitor`、不因普通接触中止。成功需插入到位、松爪、末端撤离且物体稳定连续至少 0.25 秒，每个物理步仍监测任务完成状态；全部任务成功返回 0，否则返回 2。
+
+需要额外观察接触时使用 `--contact-diagnostics`，此模式只记录旧阈值诊断，正常完成任务仍可记为成功。`--stop-on-contact` 才启用旧严格接触中止；`--no-contact-diagnostics`、`--no-stop-on-contact` 可关闭 YAML 中的相应选项，旧 `--continue-on-contact` 兼容为禁用接触中止。默认报告 `contact_policy="off"`、`contacts.enabled=false`、`contact_checks=0`、`contact_clean=null`，含义是未做附加诊断，不是“零碰撞”。`physics_checks` 记录任务成功监测次数。非法动作、非有限值、关节越界和数值异常仍会报告失败。
 
 推理环境单独使用 `mujoco_policy`，包含兼容的 Python、PyTorch、当前 fork 的 LeRobot 和 MuJoCo；环境定义与锁文件在工作区根目录，重建入口为 `scripts/setup_policy_env.sh`。原 `mujoco` 采集环境与 `lerobot` 数据转换环境保留。该模型的实际任务成功率应读取部署报告；数据集物理动作回放成功并不代表训练策略也会成功。
 
@@ -381,18 +416,22 @@ sim.step(action)  # 一次 100 ms；持续循环直到成功、超时或异常
 
 结果目录分别为 `outputs/insert_plug/rollouts/act_030000_pos0_n1_cpu/`、`act_030000_pos0_n100_cpu/`、`act_030000_pos0_n10_cuda/`。GPU 运行检查了完整 60,000 个物理步，双视角视频为 512×256、10 fps；60 秒仿真在未开启实时节流时约耗时 51 秒。最早 CPU 烟测的 XML 是根据报告保存的完整配置补建，并在报告中注明；后续运行在启动时直接保存实际 XML。三个设置均未完成任务，这是已测 pos0 的结果，不能推广成全部十个位置的成功率。
 
-完整无窗口批量测试按训练运行名称保存到 `outputs/test/act_insert_plug_20261107_2044/`。旧的 10 步执行批次及其中的额外诊断已按用户要求删除；同目录已完成新的 50 步批次，每个 pos 测试 10 次，共 100 次。结果为 **3 次完整成功、97 次接触停止、0 次超时**；成功均来自 pos2（3/10），其余位置均为 0/10。详细结果见当前 `summary.json`、`episodes.csv`，成功视频可查看 `pos2/episode_000001/rollout.mp4`。
+完整无窗口批量测试按训练运行名称保存。`outputs/test/act_insert_plug_20261107_2044/` 保留旧严格接触模式的 50 步批次，每个 pos 测试 10 次，共 100 次；更早的 10 步执行批次及其额外诊断已按用户要求删除。保留批次的历史结果为 **3 次完整成功、97 次接触阈值中止、0 次超时**，成功均来自 pos2（3/10）。原 `summary.json`、`episodes.csv` 和视频不改写；97 次中止只能说明触发了当时阈值，不能证明允许继续执行后仍会失败，也不能代表当前默认模式的成功率。
+
+关闭接触中止后另测 pos3、seed 30 一次，完整执行 600 个动作、60 秒，无接触中止或运行异常，但超时未完成任务，见[单次新模式报告](../../outputs/test/act_insert_plug_20261107_2044_contact_response/pos3/summary.json)与[双视角视频](../../outputs/test/act_insert_plug_20261107_2044_contact_response/pos3/episode_000000/rollout.mp4)。视频 601 帧完整解码。这是单次检查，不是 100 条重新评估结果。
+
+后续新模式批量测试使用新目录，例如下列命令；示例不表示已重新执行 100 次测试：
 
 ```bash
 python scripts/test_insert_plug_policy.py --workers 5 --n-action-steps 50 \
-  --output outputs/test/act_insert_plug_20261107_2044
+  --output outputs/test/act_insert_plug_20261107_2044_contact_response_batch
 python scripts/summarize_insert_plug_policy_test.py \
-  --root outputs/test/act_insert_plug_20261107_2044 \
+  --root outputs/test/act_insert_plug_20261107_2044_contact_response_batch \
   --checkpoint outputs/train/act_insert_plug_20261107_2044/artifacts/checkpoints/030000 \
   --n-action-steps 50 --write
 ```
 
-历史 pos0 逐步诊断发现，完整预测里超过 5 mm 的抬升在第 23–28 个动作才出现，前 10 步主要保持抓取，因此反复重新预测会推迟抬升。当前改为执行 50 步，是为了实际测试更长预测段的效果；模型每步仍为 100 ms，碰撞保护和成功标准保持不变。
+历史 pos0 逐步诊断发现，完整预测里超过 5 mm 的抬升在第 23–28 个动作才出现，前 10 步主要保持抓取，因此反复重新预测会推迟抬升。这是调整到 50 步的依据。当前每步仍为 100 ms；之后按用户要求关闭了默认附加接触中止，模型完成率需在新模式下另行评估。
 
 ## STL 与碰撞几何
 

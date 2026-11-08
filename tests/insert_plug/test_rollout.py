@@ -114,7 +114,12 @@ def test_live_policy_uses_ten_hz_actual_targets_and_only_public_inputs(sim, scen
         assert result['simulation_seconds'] == pytest.approx(.3)
         assert result['stop_reason'] == 'timeout'
         assert not result['success']
-        assert result['contact_clean']
+        assert result['contact_clean'] is None
+        assert result['contact_policy'] == 'off'
+        assert result['contact_diagnostics'] is False
+        assert result['contacts']['enabled'] is False
+        assert result['contacts']['unsafe_contact_count'] is None
+        assert result['contact_checks'] == 0
         assert len(policy.observations) == 3
         assert set(policy.observations[0]) == {
             'observation.state', 'observation.images.head', 'observation.images.wrist'}
@@ -176,20 +181,84 @@ def test_success_span_is_continuous_and_inspection_does_not_mutate_live_state(si
     assert monitor.continuous_success_seconds == 0
 
 
-def test_real_collision_stops_on_first_physics_tick(sim):
+def _place_peg_against_holder(sim):
     joint = sim.model.joint('peg_free').qposadr[0]
     target = sim.site('target_hole')
     sim.data.qpos[joint:joint + 7] = [target[0] + .002, target[1], target[2] - .015, 1, 0, 0, 0]
     mujoco.mj_forward(sim.model, sim.data)
-    result = run_episode(sim, hold_policy(sim), duration=.1, quiet=True)
+    assert sim.data.ncon > 0
+
+
+def test_real_collision_stops_only_when_strict_diagnostics_are_requested(sim):
+    _place_peg_against_holder(sim)
+    result = run_episode(sim, hold_policy(sim), duration=.1, quiet=True, stop_on_contact=True)
     assert result['stop_reason'] == 'contact_violation'
     assert result['physics_checks'] == 1
+    assert result['success_physics_samples'] == 1
+    assert result['contact_checks'] == 1
+    assert result['contacts']['enabled'] is True
+    assert result['contact_policy'] == 'stop'
+    assert result['contact_diagnostics'] is True
     assert result['simulation_seconds'] == pytest.approx(.001)
     assert result['completed_control_steps'] == 0
     assert result['partial_final_control_interval']
     assert not result['contact_clean']
     assert not result['success']
     assert result['contacts']['first_violation']['phase'] == 'policy_rollout'
+
+
+def test_default_contacts_keep_physics_running_without_constructing_a_classifier(sim, monkeypatch):
+    from examples.insert_plug import rollout
+
+    def forbidden_classifier(*args, **kwargs):
+        pytest.fail('Default rollout must not construct the extra contact classifier')
+
+    monkeypatch.setattr(rollout, 'ReplayContactMonitor', forbidden_classifier)
+    _place_peg_against_holder(sim)
+    masks = sim.model.geom_contype.copy(), sim.model.geom_conaffinity.copy()
+    result = run_episode(sim, hold_policy(sim), duration=.1, quiet=True)
+    assert result['stop_reason'] == 'timeout'
+    assert result['runtime_error'] is None
+    assert result['completed_control_steps'] == 1
+    assert result['physics_checks'] == 100
+    assert result['simulation_seconds'] == pytest.approx(.1)
+    assert not result['partial_final_control_interval']
+    assert result['contacts']['unsafe_contact_count'] is None
+    assert result['contact_clean'] is None
+    np.testing.assert_array_equal(sim.model.geom_contype, masks[0])
+    np.testing.assert_array_equal(sim.model.geom_conaffinity, masks[1])
+
+
+def test_optional_contact_diagnostics_record_contacts_without_aborting(sim):
+    _place_peg_against_holder(sim)
+    result = run_episode(sim, hold_policy(sim), duration=.1, quiet=True, contact_diagnostics=True)
+    assert result['stop_reason'] == 'timeout'
+    assert result['runtime_error'] is None
+    assert result['completed_control_steps'] == 1
+    assert result['physics_checks'] == result['contact_checks'] == 100
+    assert result['contact_policy'] == 'diagnostic'
+    assert result['contact_clean'] is False
+    assert result['contacts']['unsafe_contact_count'] > 0
+
+
+@pytest.mark.parametrize('diagnostics', [False, True])
+def test_success_grading_is_task_based_when_strict_contact_stopping_is_disabled(sim, monkeypatch, diagnostics):
+    _place_peg_against_holder(sim)
+    # Isolate the result-grading contract: the separate monitor tests above
+    # verify the real 250 ms timing. Physical contacts here are still simulated.
+    monkeypatch.setattr(PhysicalSuccessMonitor, 'metrics', lambda self: {'success': True})
+    result = run_episode(sim, hold_policy(sim), duration=.3, quiet=True, contact_diagnostics=diagnostics)
+    assert result['success'] is True
+    assert result['task_success'] is True
+    assert result['stop_reason'] == 'success'
+    assert result['continuous_success_seconds'] >= .25
+    assert result['contact_clean'] is (False if diagnostics else None)
+
+
+@pytest.mark.parametrize('options', [{'stop_on_contact': 'false'}, {'contact_diagnostics': 1}])
+def test_invalid_contact_options_do_not_silently_enable_strict_stopping(sim, options):
+    with pytest.raises(ValueError, match='must be booleans'):
+        run_episode(sim, hold_policy(sim), duration=.1, **options)
 
 
 def test_duration_cannot_silently_change_control_period(sim):

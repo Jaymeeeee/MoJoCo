@@ -256,3 +256,86 @@ def test_full_video_decode_checks_actual_count_and_propagates_corruption(tmp_pat
 
 def iter_metadata():
     yield dict(size=(512, 256), fps=10., duration=.3)
+
+
+def contact_mode(result, mode):
+    enabled = mode != 'off'
+    result.update(contact_policy=mode, contact_diagnostics=enabled,
+                  stop_on_contact=mode == 'stop', contact_checks=result['physics_checks'] if enabled else 0)
+    result['contacts']['enabled'] = enabled
+    if not enabled:
+        result['contact_clean'] = None
+        result['contacts'].update(checks=0, unsafe_contact_count=None,
+                                  first_violation=None, last_violation=None)
+
+
+def test_disabled_contact_diagnostics_preserve_unknown_counts_and_real_physics_checks(batch):
+    root, _ = batch
+    for position in audit.POSITIONS:
+        for repetition in range(10):
+            mutate(batch, lambda value: contact_mode(value, 'off'), position, repetition)
+        update_group(root, position)
+    summary, rows = summarize(batch)
+    assert summary['complete'] and summary['audit_valid']
+    assert summary['contact_clean'] is None and summary['unsafe_contact_count'] is None
+    assert summary['contact_violation_episodes'] is None
+    assert summary['contact_diagnostics_episodes'] == 0 and summary['contact_unchecked_episodes'] == 100
+    assert summary['contact_policy_counts'] == {'off': 100}
+    assert all(row['physics_checks'] == 200 and row['contact_checks'] == 0 for row in rows)
+
+
+@pytest.mark.parametrize('change,match', [
+    (lambda value: value['contacts'].update(unsafe_contact_count=0), 'remain unknown'),
+    (lambda value: value.update(contact_clean=True), 'remain unknown'),
+    (lambda value: value.update(contact_checks=200), 'Contact check counts'),
+    (lambda value: value.update(stop_on_contact=True), 'stop_on_contact disagree'),
+    (lambda value: value['contacts'].update(enabled=True), 'enabled flags disagree'),
+])
+def test_disabled_diagnostics_cannot_be_misreported_as_measured(batch, change, match):
+    def alter(value):
+        contact_mode(value, 'off')
+        change(value)
+    mutate(batch, alter)
+    update_group(batch[0], 'pos0')
+    summary, _ = summarize(batch)
+    assert not summary['audit_valid']
+    assert any(match in error for error in summary['errors'])
+
+
+def test_diagnostic_contacts_do_not_veto_success_but_strict_mode_does(batch):
+    folder = batch[0]/'pos0/episode_000000'
+    result = json.loads((folder/'result.json').read_text())
+    result.update(success=True, task_success=True, stop_reason='success', requested_duration_s=.3,
+                  simulation_seconds=.3, completed_control_steps=3, attempted_control_steps=3,
+                  selected_actions=3, physics_checks=300, video_frames=4,
+                  continuous_success_seconds=.25, success_required_seconds=.25,
+                  final_metrics=dict(success=True), contact_clean=False)
+    result['contacts'].update(checks=300, unsafe_contact_count=5)
+    result['policy']['calls'] = 3
+    contact_mode(result, 'diagnostic')
+    arguments = dict(position='pos0', repetition=0, checkpoint=batch[1],
+                     layout=result['config']['board'], video_check='none', duration=.3)
+    checked = audit.audit_episode(folder, result, **arguments)
+    assert checked['contact_policy'] == 'diagnostic' and checked['contact_checks'] == 300
+    assert audit.totals([result])['successes'] == 1
+    assert audit.totals([result])['unsafe_contact_count'] == 5
+    contact_mode(result, 'stop')
+    with pytest.raises(ValueError, match='configured contact policy'):
+        audit.audit_episode(folder, result, **arguments)
+
+
+def test_new_strict_contact_stop_requires_complete_observer_counts(batch):
+    def contact(value):
+        contact_mode(value, 'stop')
+        value.update(stop_reason='contact_violation', contact_clean=False,
+                     runtime_error='ExecutionSafetyError: forbidden contact')
+        value['contacts']['unsafe_contact_count'] = 1
+    mutate(batch, contact)
+    update_group(batch[0], 'pos0')
+    summary, rows = summarize(batch)
+    assert summary['complete'] and summary['contact_stops'] == 1
+    assert rows[0]['contact_policy'] == 'stop'
+    mutate(batch, lambda value: value['contacts'].update(checks=199))
+    summary, _ = summarize(batch)
+    assert not summary['audit_valid']
+    assert any('Contact check counts disagree' in error for error in summary['errors'])
