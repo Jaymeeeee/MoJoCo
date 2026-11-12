@@ -58,7 +58,7 @@ Regenerate the manifest from the untouched source STLs with the shared
 environment:
 
 ```bash
-env -u PYTHONPATH conda run -n mujoco python -B scripts/prepare_insert_plug_objects.py
+env -u PYTHONPATH conda run -n mujoco python -B -m examples.insert_plug.environment.prepare_objects
 ```
 
 The generator needs only the existing NumPy, SciPy and trimesh dependencies;

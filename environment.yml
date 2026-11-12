@@ -6,7 +6,8 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - python=3.11
+  - python=3.12
   - pip
-  - pip:
-      - -e .[dev]
+  - ffmpeg=7
+# scripts/setup_mujoco_env.sh installs the shared simulation, training and
+# inference dependencies from requirements-lock.txt, then the local packages.

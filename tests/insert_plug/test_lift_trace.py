@@ -1,18 +1,11 @@
 """Passive target tracing must leave physical trajectories untouched."""
-import importlib.util
-from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 
-from examples.insert_plug.scene import build_scene, load_config
-from examples.insert_plug.simulation import Simulation
-
-
-spec = importlib.util.spec_from_file_location('lift_trace_script',
-    Path(__file__).resolve().parents[2]/'scripts/diagnose_insert_plug_policy_lift.py')
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+from examples.insert_plug.environment.scene import build_scene, load_config
+from examples.insert_plug.environment.simulation import Simulation
+from examples.insert_plug.policy import diagnose_lift as module
 
 
 def test_trace_does_not_change_live_solver_or_actual_motion(tmp_path):

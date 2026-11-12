@@ -7,7 +7,7 @@ import imageio.v2 as imageio
 import numpy as np
 import pytest
 
-from examples.insert_plug.replay import generate_head_video
+from examples.insert_plug.data.replay import generate_head_video
 
 
 def _recording(path, schema="insert-plug-v3", shape=(24, 32), fps=15):

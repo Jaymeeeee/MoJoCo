@@ -10,7 +10,7 @@ from examples.insert_plug import cli
 @pytest.fixture
 def runner(monkeypatch):
     calls = []
-    monkeypatch.setitem(sys.modules, 'examples.insert_plug.rollout',
+    monkeypatch.setitem(sys.modules, 'examples.insert_plug.policy.rollout',
                         SimpleNamespace(run_rollouts=lambda **kw: calls.append(kw) or {'success': False}))
     monkeypatch.setattr(cli, '_configure_gl', lambda backend: backend)
     return calls

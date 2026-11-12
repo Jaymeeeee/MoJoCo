@@ -3,9 +3,9 @@
 import numpy as np
 import pytest
 
-from examples.insert_plug.layouts import candidate_layouts, head_visibility, mesh_world_vertices
-from examples.insert_plug.scene import build_scene, load_config
-from examples.insert_plug.simulation import Simulation
+from examples.insert_plug.environment.layouts import candidate_layouts, head_visibility, mesh_world_vertices
+from examples.insert_plug.environment.scene import build_scene, load_config
+from examples.insert_plug.environment.simulation import Simulation
 from mujoco_tools.cameras import camera_metadata
 
 

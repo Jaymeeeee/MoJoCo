@@ -6,9 +6,9 @@ import mujoco
 import numpy as np
 import pytest
 
-from examples.insert_plug.expert import Expert
-from examples.insert_plug.scene import build_scene, load_config
-from examples.insert_plug.simulation import Simulation
+from examples.insert_plug.control.expert import Expert
+from examples.insert_plug.environment.scene import build_scene, load_config
+from examples.insert_plug.environment.simulation import Simulation
 
 
 @pytest.fixture(scope="module")

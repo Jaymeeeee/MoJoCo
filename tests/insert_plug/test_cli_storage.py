@@ -8,8 +8,11 @@ import h5py
 import numpy as np
 import pytest
 
-from examples.insert_plug import cli, expert, replay, scene, simulation
-from examples.insert_plug.dataset import validate_episode
+from examples.insert_plug import cli
+from examples.insert_plug.control import expert
+from examples.insert_plug.data import replay
+from examples.insert_plug.environment import scene, simulation
+from examples.insert_plug.data.dataset import validate_episode
 from mujoco_tools.paths import WORKSPACE_ROOT
 
 
@@ -42,7 +45,7 @@ def short_collection(monkeypatch, tmp_path):
 
     class ShortExpert:
         def __init__(self, sim, **kwargs):
-            from examples.insert_plug.recording import RecordingSampler
+            from examples.insert_plug.data.recording import RecordingSampler
             self.writer = None
             self.plan_directory = kwargs.get("plan_directory")
             self.recording_sampler = RecordingSampler(15, 0.001, 0.0)

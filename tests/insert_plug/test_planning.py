@@ -8,10 +8,10 @@ import mujoco
 import numpy as np
 import pytest
 
-from examples.insert_plug.execution_guard import ExecutionSafetyError, MotionGuard
-from examples.insert_plug.planning import PlanningError, TaskPlanner
-from examples.insert_plug.scene import build_scene, load_config
-from examples.insert_plug.simulation import Simulation
+from examples.insert_plug.control.execution_guard import ExecutionSafetyError, MotionGuard
+from examples.insert_plug.control.planning import PlanningError, TaskPlanner
+from examples.insert_plug.environment.scene import build_scene, load_config
+from examples.insert_plug.environment.simulation import Simulation
 
 
 @pytest.fixture(scope='module')
@@ -218,7 +218,7 @@ def test_changed_diagonal_layout_refreshes_grasp_alignment_before_insertion(tmp_
     This layout previously stopped above the target with 0.385 mm shaft-axis
     error, exceeding the unchanged 0.350 mm entry budget.
     """
-    from examples.insert_plug.expert import Expert
+    from examples.insert_plug.control.expert import Expert
 
     config = load_config()
     config['board']['source_xy'] = [0.40, -0.10]
@@ -291,7 +291,7 @@ def test_changed_diagonal_layout_refreshes_grasp_alignment_before_insertion(tmp_
 
 
 def test_default_expert_keeps_contacts_in_physics_without_threshold_abort(tmp_path, monkeypatch):
-    from examples.insert_plug import expert as module
+    from examples.insert_plug.control import expert as module
 
     config = load_config()
     assert config['task']['planning']['strict_collision_checks'] is False

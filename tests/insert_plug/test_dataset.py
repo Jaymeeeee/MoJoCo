@@ -7,7 +7,7 @@ import h5py
 import numpy as np
 import pytest
 
-from examples.insert_plug.dataset import EpisodeWriter, read_episode, validate_episode
+from examples.insert_plug.data.dataset import EpisodeWriter, read_episode, validate_episode
 
 
 def record(timestamp=0.0, with_depth=False):

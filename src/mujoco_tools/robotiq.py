@@ -91,7 +91,7 @@ def attach_gripper(root: ET.Element, options: dict) -> ET.Element:
     directory = directory.resolve() if directory.is_absolute() else (WORKSPACE_ROOT / directory).resolve()
     filename = directory / options.get("model_file", "2f85.xml")
     if not filename.is_file():
-        raise FileNotFoundError(f"Missing Robotiq model: {filename}. Run python scripts/fetch_gripper.py")
+        raise FileNotFoundError(f"Missing Robotiq model: {filename}. Run python scripts/setup_assets.py")
     gripper = ET.parse(filename).getroot()
     link = root.find(".//body[@name='fr3_link7']")
     if link is None:

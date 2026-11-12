@@ -9,12 +9,12 @@ import numpy as np
 import pytest
 import yaml
 
-from examples.insert_plug.dataset import EpisodeWriter
-from examples.insert_plug.layouts import manifest_row
-from examples.insert_plug.recording import RecordingSampler
-from examples.insert_plug.replay import generate_head_video
-from scripts.audit_insert_plug_batch import audit_batch, audit_episode, grid_steps
-from scripts.check_insert_plug_action_replay import load_episode
+from examples.insert_plug.data.dataset import EpisodeWriter
+from examples.insert_plug.environment.layouts import manifest_row
+from examples.insert_plug.data.recording import RecordingSampler
+from examples.insert_plug.data.replay import generate_head_video
+from examples.insert_plug.diagnostics.audit_batch import audit_batch, audit_episode, grid_steps
+from examples.insert_plug.diagnostics.check_action_replay import load_episode
 
 
 def make_episode(root, index=0, *, source=(.47, -.05), target=(.43, .09), control_hz=10):
@@ -98,8 +98,8 @@ def test_manifest_selects_control_rate_and_rejects_an_explicit_conflict(tmp_path
     )))
     # A synthetic XML has no camera: isolate manifest timing propagation from
     # the separate production camera-containment check.
-    import examples.insert_plug.layouts as layouts
-    import examples.insert_plug.simulation as simulation
+    import examples.insert_plug.environment.layouts as layouts
+    import examples.insert_plug.environment.simulation as simulation
     import mujoco
     from types import SimpleNamespace
     class SyntheticSimulation:
@@ -162,6 +162,22 @@ def test_action_replay_rejects_execution_duration_mismatch(tmp_path):
     update_metadata(folder, lambda meta: meta['execution_result'].update(steps=4))
     with pytest.raises(ValueError, match='duration'):
         load_episode(folder / f'{folder.name}.h5')
+
+
+@pytest.mark.parametrize('limit,valid', [(.4, True), (.3, False), (.2, False)])
+def test_batch_duration_limit_is_strict_and_checks_the_complete_rollout(tmp_path, limit, valid):
+    make_episode(tmp_path)
+    result = audit_batch(tmp_path, positions=1, episodes_per_position=1, max_duration_s=limit)
+    assert result['valid'] is valid
+    assert result['max_duration_s'] == limit
+    if not valid:
+        assert 'strictly below' in result['errors'][0]
+
+
+@pytest.mark.parametrize('limit', [0., -1., float('nan'), float('inf')])
+def test_batch_rejects_invalid_duration_limit(tmp_path, limit):
+    with pytest.raises(ValueError, match='Duration limit'):
+        audit_batch(tmp_path, max_duration_s=limit)
 
 
 @pytest.mark.parametrize('damage', ['depth', 'video', 'guard', 'sidecar'])

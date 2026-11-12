@@ -1,0 +1,355 @@
+format_version: 1
+split: heldout_coordinate_range
+layout_set_id: insert_plug_generalization_v1
+description: Previously unseen source and target XY, each within training coordinate
+  bounds; no claim of 4-D convex-hull interpolation.
+names_are_local_to_manifest: true
+training_position_ids: [pos0, pos1, pos2, pos3, pos4, pos5, pos6, pos7, pos8, pos9]
+training_position_id_note: These IDs belong to the original training manifest, not
+  the held-out pos0..pos9 rows below.
+base_config: config/insert_plug.yaml
+base_config_sha256: b3a1932e9b4d283479b5c0959726b51ca168f843f7c9ca69d1038ff22da98826
+base_source_xy: [0.45, -0.07]
+base_target_xy: [0.45, 0.07]
+selection_seed: 20261109
+selection_method: seeded permutation of interstitial grid pairs; greedy unique source
+  and target
+selection_uses_policy_outcomes: false
+coordinate_order: [source_x, source_y, target_x, target_y]
+training_coordinate_bounds_m:
+- [0.41, 0.49]
+- [-0.11, -0.03]
+- [0.41, 0.49]
+- [0.03, 0.11]
+grid_spacing_m: 0.02
+grid_offset_from_training_min_m: 0.01
+minimum_training_point_distance_m: 0.01
+minimum_training_pair_4d_distance_m: 0.02
+required_edge_margin_px: 5.0
+occlusion_checked: false
+visibility_method: all compiled visual mesh vertices projected into head optical camera
+control_hz: 10
+recording_hz: 10
+action_hold_seconds: 0.1
+episodes_per_position: 10
+selection_complete: true
+training_evidence:
+  path: outputs/_checks/insert_plug_generalization_v1/training_evidence.json
+  sha256: 5136ed7c6b93ae129af95314736c1686ed360bb75d9ad83d8158b20eb1037234
+selection_plan:
+  path: outputs/_checks/insert_plug_generalization_v1/selection_plan.json
+  sha256: 204efd9dee48014c9e784c87a3b407a49874c4c3cd886b41f6ddd85c928a3fb5
+expert_validation:
+  path: outputs/_checks/insert_plug_generalization_v1/summary.json
+  sha256: 5354bb78592658daee695831250ed966095bd28a806f067934107b67c67ed9f4
+positions:
+- name: pos0
+  heldout_layout_id: generalization_v1_pos0
+  split: heldout_coordinate_range
+  source_xy: [0.48, -0.08]
+  target_xy: [0.42, 0.04]
+  candidate_pool_index: 208
+  novelty:
+    min_training_source_xy_distance_m: 0.014142135623730954
+    min_training_target_xy_distance_m: 0.014142135623730958
+    min_training_pair_4d_distance_m: 0.04472135954999577
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 67.25091214633221
+    final:
+      all_inside: true
+      min_edge_margin_px: 69.65411993610829
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    radial_error_m: 3.174595369434672e-05
+    insertion_depth_m: 0.030000011030800817
+    collision_checks_enabled: false
+    contact_clean: null
+  validation_report:
+    path: outputs/_checks/insert_plug_generalization_v1/pos0/result.json
+    sha256: c0530febece66d2f5da7ca57248031266acb59308c1adf4f920e307d19597839
+  validation_trace:
+    path: outputs/_checks/insert_plug_generalization_v1/pos0/trace.npz
+    sha256: 92bfe4661661da5cce148b4437cf3049f98c33715590417bdd9414ddd2b5485b
+- name: pos1
+  heldout_layout_id: generalization_v1_pos1
+  split: heldout_coordinate_range
+  source_xy: [0.42, -0.06]
+  target_xy: [0.46, 0.1]
+  candidate_pool_index: 43
+  novelty:
+    min_training_source_xy_distance_m: 0.014142135623730954
+    min_training_target_xy_distance_m: 0.014142135623730925
+    min_training_pair_4d_distance_m: 0.03464101615137755
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 59.199026358520655
+    final:
+      all_inside: true
+      min_edge_margin_px: 56.73300830104148
+  physics_check:
+    success: true
+    duration_seconds: 19.10000000000036
+    control_steps: 191
+    radial_error_m: 2.9930225487162924e-05
+    insertion_depth_m: 0.030000011031048022
+    collision_checks_enabled: false
+    contact_clean: null
+  validation_report:
+    path: outputs/_checks/insert_plug_generalization_v1/pos1/result.json
+    sha256: 17253867725ce49935e4b1fda3ccade90db2892d33486e04772c4f77556477da
+  validation_trace:
+    path: outputs/_checks/insert_plug_generalization_v1/pos1/trace.npz
+    sha256: 9e4102f82bc5dbe5200b26820af1480b25f644f251cb693b36595d8ff82eca24
+- name: pos2
+  heldout_layout_id: generalization_v1_pos2
+  split: heldout_coordinate_range
+  source_xy: [0.42, -0.1]
+  target_xy: [0.48, 0.1]
+  candidate_pool_index: 15
+  novelty:
+    min_training_source_xy_distance_m: 0.014142135623730963
+    min_training_target_xy_distance_m: 0.014142135623730963
+    min_training_pair_4d_distance_m: 0.034641016151377525
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 56.78524864446541
+    final:
+      all_inside: true
+      min_edge_margin_px: 54.18851994813244
+  physics_check:
+    success: true
+    duration_seconds: 19.60000000000097
+    control_steps: 196
+    radial_error_m: 3.00295388302972e-05
+    insertion_depth_m: 0.030000011031007804
+    collision_checks_enabled: false
+    contact_clean: null
+  validation_report:
+    path: outputs/_checks/insert_plug_generalization_v1/pos2/result.json
+    sha256: fa75825cfc79798fee3482806cb43a9b9ab955041142d7b2b5d62c7698541782
+  validation_trace:
+    path: outputs/_checks/insert_plug_generalization_v1/pos2/trace.npz
+    sha256: 623506ea8198fd6c091409437a09b2e6ccaffa90133182c585dfe3c627f06635
+- name: pos3
+  heldout_layout_id: generalization_v1_pos3
+  split: heldout_coordinate_range
+  source_xy: [0.48, -0.06]
+  target_xy: [0.44, 0.04]
+  candidate_pool_index: 228
+  novelty:
+    min_training_source_xy_distance_m: 0.014142135623730954
+    min_training_target_xy_distance_m: 0.014142135623730958
+    min_training_pair_4d_distance_m: 0.04472135954999577
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 80.34853988721358
+    final:
+      all_inside: true
+      min_edge_margin_px: 82.2021781819957
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    radial_error_m: 3.14220092108586e-05
+    insertion_depth_m: 0.030000011030838047
+    collision_checks_enabled: false
+    contact_clean: null
+  validation_report:
+    path: outputs/_checks/insert_plug_generalization_v1/pos3/result.json
+    sha256: 62683450ff29c94c725c8e80fece668e931c1d05aa521d72802284320b411f43
+  validation_trace:
+    path: outputs/_checks/insert_plug_generalization_v1/pos3/trace.npz
+    sha256: 07f70073d2b2afa1174af4bd4304ae4e6f0e66ed29c73756ba62ba6b694455c3
+- name: pos4
+  heldout_layout_id: generalization_v1_pos4
+  split: heldout_coordinate_range
+  source_xy: [0.46, -0.1]
+  target_xy: [0.46, 0.06]
+  candidate_pool_index: 137
+  novelty:
+    min_training_source_xy_distance_m: 0.014142135623730954
+    min_training_target_xy_distance_m: 0.014142135623730914
+    min_training_pair_4d_distance_m: 0.0447213595499958
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 56.69986057166904
+    final:
+      all_inside: true
+      min_edge_margin_px: 59.19902616138447
+  physics_check:
+    success: true
+    duration_seconds: 19.200000000000482
+    control_steps: 192
+    radial_error_m: 3.171320082319027e-05
+    insertion_depth_m: 0.03000001103077383
+    collision_checks_enabled: false
+    contact_clean: null
+  validation_report:
+    path: outputs/_checks/insert_plug_generalization_v1/pos4/result.json
+    sha256: 89a17e4dab23020eeba4afb5406013ea9b8fba5c2e7c4eeba56e8520d582fae7
+  validation_trace:
+    path: outputs/_checks/insert_plug_generalization_v1/pos4/trace.npz
+    sha256: 4c10185d074946eb877894c3ecb932af7e68c278f6a2bcdb03b30bcb809ac41c
+- name: pos5
+  heldout_layout_id: generalization_v1_pos5
+  split: heldout_coordinate_range
+  source_xy: [0.42, -0.04]
+  target_xy: [0.48, 0.08]
+  candidate_pool_index: 62
+  novelty:
+    min_training_source_xy_distance_m: 0.014142135623730958
+    min_training_target_xy_distance_m: 0.014142135623730954
+    min_training_pair_4d_distance_m: 0.03464101615137755
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 69.65412014018409
+    final:
+      all_inside: true
+      min_edge_margin_px: 67.2823946089936
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    radial_error_m: 2.914566176255141e-05
+    insertion_depth_m: 0.030000011031236153
+    collision_checks_enabled: false
+    contact_clean: null
+  validation_report:
+    path: outputs/_checks/insert_plug_generalization_v1/pos5/result.json
+    sha256: 1a534fb0fee28b1d488965d1f64440e2c99255b32dc4d6127866cc44094576ed
+  validation_trace:
+    path: outputs/_checks/insert_plug_generalization_v1/pos5/trace.npz
+    sha256: c078771adc485c444c15fc7d2a65de363405a9a3a503b713b97bae1716d587e1
+- name: pos6
+  heldout_layout_id: generalization_v1_pos6
+  split: heldout_coordinate_range
+  source_xy: [0.44, -0.06]
+  target_xy: [0.44, 0.1]
+  candidate_pool_index: 103
+  novelty:
+    min_training_source_xy_distance_m: 0.014142135623730954
+    min_training_target_xy_distance_m: 0.014142135623730954
+    min_training_pair_4d_distance_m: 0.04472135954999575
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 61.45345934276935
+    final:
+      all_inside: true
+      min_edge_margin_px: 59.10805759376569
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    radial_error_m: 3.168482947339218e-05
+    insertion_depth_m: 0.030000011030764967
+    collision_checks_enabled: false
+    contact_clean: null
+  validation_report:
+    path: outputs/_checks/insert_plug_generalization_v1/pos6/result.json
+    sha256: 4fbd693db726d2415e7990621f4852c55905e637d7bba54039b144528cb77325
+  validation_trace:
+    path: outputs/_checks/insert_plug_generalization_v1/pos6/trace.npz
+    sha256: fff4e2584972ba43bc27044a5b461209032ca9a68a22fabd7a9720465c1a7acd
+- name: pos7
+  heldout_layout_id: generalization_v1_pos7
+  split: heldout_coordinate_range
+  source_xy: [0.44, -0.08]
+  target_xy: [0.48, 0.06]
+  candidate_pool_index: 93
+  novelty:
+    min_training_source_xy_distance_m: 0.014142135623730954
+    min_training_target_xy_distance_m: 0.014142135623730954
+    min_training_pair_4d_distance_m: 0.034641016151377546
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 71.29419153519255
+    final:
+      all_inside: true
+      min_edge_margin_px: 73.41644200674264
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    radial_error_m: 3.049044242055355e-05
+    insertion_depth_m: 0.03000001103092524
+    collision_checks_enabled: false
+    contact_clean: null
+  validation_report:
+    path: outputs/_checks/insert_plug_generalization_v1/pos7/result.json
+    sha256: 00cb03ecb908bea58ca3627e78e0e5db69413d9cf34c7f8b30c18eddab310e0f
+  validation_trace:
+    path: outputs/_checks/insert_plug_generalization_v1/pos7/trace.npz
+    sha256: 826c98c619b8b6cc169d76398741a07b3c03781fa6f402aac8df0720c1a8d9d1
+- name: pos8
+  heldout_layout_id: generalization_v1_pos8
+  split: heldout_coordinate_range
+  source_xy: [0.44, -0.1]
+  target_xy: [0.42, 0.06]
+  candidate_pool_index: 65
+  novelty:
+    min_training_source_xy_distance_m: 0.014142135623730954
+    min_training_target_xy_distance_m: 0.014142135623730954
+    min_training_pair_4d_distance_m: 0.020000000000000004
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 59.075537570914946
+    final:
+      all_inside: true
+      min_edge_margin_px: 61.45345915214562
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    radial_error_m: 3.080143002521603e-05
+    insertion_depth_m: 0.03000001103088084
+    collision_checks_enabled: false
+    contact_clean: null
+  validation_report:
+    path: outputs/_checks/insert_plug_generalization_v1/pos8/result.json
+    sha256: 6cd768576408004bedfbf236eda97f66e7f272b60fb7481f01b1eab06d143207
+  validation_trace:
+    path: outputs/_checks/insert_plug_generalization_v1/pos8/trace.npz
+    sha256: bc06524af6c8ccca35c625d62a54e2b021e17ffa34d57b1d90c4addc331e13fc
+- name: pos9
+  heldout_layout_id: generalization_v1_pos9
+  split: heldout_coordinate_range
+  source_xy: [0.48, -0.04]
+  target_xy: [0.42, 0.1]
+  candidate_pool_index: 243
+  novelty:
+    min_training_source_xy_distance_m: 0.014142135623730958
+    min_training_target_xy_distance_m: 0.014142135623730954
+    min_training_pair_4d_distance_m: 0.03464101615137755
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 63.563822061576104
+    final:
+      all_inside: true
+      min_edge_margin_px: 61.32903119260749
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    radial_error_m: 3.2219525025298625e-05
+    insertion_depth_m: 0.03000001103071916
+    collision_checks_enabled: false
+    contact_clean: null
+  validation_report:
+    path: outputs/_checks/insert_plug_generalization_v1/pos9/result.json
+    sha256: 24013d797099dfa01583fd65bb325483af502ba53c409bd34fa091a574af4347
+  validation_trace:
+    path: outputs/_checks/insert_plug_generalization_v1/pos9/trace.npz
+    sha256: a6fc3b60acd6db66f2338c9a713cd11010a368b0714b2e95417036f33b37951c

@@ -7,11 +7,11 @@ import mujoco
 import numpy as np
 import pytest
 
-from examples.insert_plug.rollout import (
+from examples.insert_plug.policy.rollout import (
     PhysicalSuccessMonitor, run_episode, select_layouts, validate_contract,
 )
-from examples.insert_plug.scene import build_scene, load_config
-from examples.insert_plug.simulation import Simulation
+from examples.insert_plug.environment.scene import build_scene, load_config
+from examples.insert_plug.environment.simulation import Simulation
 
 
 class HoldPolicy:
@@ -54,6 +54,7 @@ def sim(scene_resources):
             'observation.images.head': np.zeros((256, 256, 3), dtype=np.uint8),
             'observation.images.wrist': np.zeros((256, 256, 3), dtype=np.uint8),
             'observation.depth.head': np.ones((256, 256), dtype=np.float32),
+            'observation.depth.wrist': np.full((256, 256), .25, dtype=np.float32),
             'privileged.peg_pose': np.ones(7),
         }
     simulation.observe = observe
@@ -65,6 +66,17 @@ def sim(scene_resources):
 
 def hold_policy(sim):
     return HoldPolicy(sim.config, np.r_[sim.data.qpos[sim.arm_qadr], sim.gripper_width()].astype(np.float32))
+
+
+def rgbd_hold_policy(sim):
+    policy = hold_policy(sim)
+    policy.depth_camera_map = {f'observation.images.{camera}': f'observation.depth.{camera}'
+                               for camera in ('head', 'wrist')}
+    policy.depth_unit = 'm'
+    policy.input_features.update({key: {'type': 'VISUAL',
+        'shape': [1, sim.config['cameras']['height'], sim.config['cameras']['width']]}
+        for key in policy.depth_camera_map.values()})
+    return policy
 
 
 def test_layout_selection_preserves_base_and_uses_vetted_pairs():
@@ -127,8 +139,98 @@ def test_live_policy_uses_ten_hz_actual_targets_and_only_public_inputs(sim, scen
         np.testing.assert_array_equal(sim.data.qvel, reference.data.qvel)
         assert sim.safety_callback is None
         assert sim.depth_enabled == bool(sim.config['cameras']['depth']['enabled'])
+        assert result['observation_modalities'] == 'rgb'
+        assert result['depth_rendered'] is False
+        assert result['depth_input_keys'] == []
+        assert result['depth_unit'] is None
+        assert result['depth_observation_frames'] == 0
     finally:
         reference.close()
+
+
+@pytest.mark.parametrize('corruption', ['map', 'unit', 'resolution', 'missing_depth'])
+def test_rgbd_contract_rejects_unpaired_or_incompatible_depth(sim, corruption):
+    policy = rgbd_hold_policy(sim)
+    validate_contract(sim.config, policy)
+    if corruption == 'map':
+        policy.depth_camera_map['observation.images.head'] = 'observation.depth.wrist'
+    elif corruption == 'unit':
+        policy.depth_unit = 'mm'
+    elif corruption == 'resolution':
+        policy.input_features['observation.depth.head']['shape'] = [1, 128, 128]
+    else:
+        del policy.input_features['observation.depth.wrist']
+    with pytest.raises(ValueError, match='depth_camera_map|depth_unit=m|observation contract'):
+        validate_contract(sim.config, policy)
+
+
+@pytest.mark.parametrize('rgbd', [False, True])
+def test_rollout_uses_checkpoint_modalities_and_restores_render_mode(sim, monkeypatch, rgbd):
+    policy = rgbd_hold_policy(sim) if rgbd else hold_policy(sim)
+    sim.depth_enabled = not rgbd
+    original_depth = sim.depth_enabled
+    original_observe = sim.observe
+    render_modes = []
+
+    def observe(data=None):
+        render_modes.append(sim.depth_enabled)
+        result = original_observe(data)
+        if not sim.depth_enabled:
+            result = {key: value for key, value in result.items() if not key.startswith('observation.depth.')}
+        return result
+
+    monkeypatch.setattr(sim, 'observe', observe)
+    result = run_episode(sim, policy, duration=.2, quiet=True)
+    assert result['runtime_error'] is None
+    assert result['completed_control_steps'] == 2
+    assert result['physics_checks'] == 200
+    assert render_modes == [rgbd, rgbd]
+    assert sim.depth_enabled is original_depth
+    assert result['policy_input_keys'] == list(policy.input_features)
+    assert result['depth_rendered'] is rgbd
+    assert result['depth_observation_frames'] == (2 if rgbd else 0)
+    assert all(set(obs) == set(policy.input_features) for obs in policy.observations)
+    if rgbd:
+        assert result['depth_unit'] == 'm'
+        assert result['depth_convention'] == 'camera_optical_axis_z'
+        np.testing.assert_array_equal(policy.observations[0]['observation.depth.head'],
+                                      np.ones((256, 256), dtype=np.float32))
+        np.testing.assert_array_equal(policy.observations[0]['observation.depth.wrist'],
+                                      np.full((256, 256), .25, dtype=np.float32))
+
+
+@pytest.mark.parametrize('corruption', ['missing', 'resolution', 'dtype', 'nan', 'negative'])
+def test_invalid_live_depth_fails_before_any_action_and_restores_render_mode(sim, monkeypatch, corruption):
+    policy = rgbd_hold_policy(sim)
+    original_observe = sim.observe
+    sim.depth_enabled = False
+    before = sim.data.qpos.copy()
+
+    def observe(data=None):
+        result = original_observe(data)
+        key = 'observation.depth.head'
+        if corruption == 'missing':
+            del result[key]
+        elif corruption == 'resolution':
+            result[key] = np.ones((128, 128), dtype=np.float32)
+        elif corruption == 'dtype':
+            result[key] = np.ones((256, 256), dtype=np.uint16)
+        elif corruption == 'nan':
+            result[key][0, 0] = np.nan
+        else:
+            result[key][0, 0] = -1.
+        return result
+
+    monkeypatch.setattr(sim, 'observe', observe)
+    result = run_episode(sim, policy, duration=.1, quiet=True)
+    assert result['stop_reason'] == 'runtime_error'
+    assert 'observation.depth.head' in result['runtime_error']
+    assert result['selected_actions'] == result['completed_control_steps'] == 0
+    assert result['depth_observation_frames'] == 0
+    assert result['simulation_seconds'] == 0
+    assert policy.observations == []
+    assert sim.depth_enabled is False
+    np.testing.assert_array_equal(sim.data.qpos, before)
 
 
 def test_invalid_action_is_reported_without_moving_or_clipping(sim):
@@ -208,7 +310,7 @@ def test_real_collision_stops_only_when_strict_diagnostics_are_requested(sim):
 
 
 def test_default_contacts_keep_physics_running_without_constructing_a_classifier(sim, monkeypatch):
-    from examples.insert_plug import rollout
+    from examples.insert_plug.policy import rollout
 
     def forbidden_classifier(*args, **kwargs):
         pytest.fail('Default rollout must not construct the extra contact classifier')

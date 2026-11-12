@@ -2,7 +2,7 @@
 
 RGB uses H.264 videos. Depth uses LeRobot's native float32 TIFF image feature,
 embedded losslessly in Parquet; it is never quantized into a depth video.
-Run in the separate ``lerobot`` environment, not the simulator environment.
+Run in the shared ``mujoco`` simulation, conversion and training environment.
 """
 from __future__ import annotations
 

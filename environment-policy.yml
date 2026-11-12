@@ -1,13 +1,14 @@
-name: mujoco_policy
-channels:
-  - conda-forge
-  - nodefaults
+# Compatibility filename: use the same shared environment as environment.yml.
+name: mujoco
 variables:
   PYTHONPATH: ""
   PYTHONNOUSERSITE: "1"
+channels:
+  - conda-forge
+  - nodefaults
 dependencies:
   - python=3.12
   - pip
-  - ffmpeg
-# scripts/setup_policy_env.sh installs the pinned Python runtime and local
-# LeRobot fork. This environment is separate from collection and conversion.
+  - ffmpeg=7
+# scripts/setup_mujoco_env.sh installs the shared simulation, training and
+# inference dependencies from requirements-lock.txt, then the local packages.

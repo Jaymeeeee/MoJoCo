@@ -47,8 +47,8 @@ def view_scene(args):
     """Inspect the initial scene without starting the expert or data writer."""
     _configure_gl('glfw')
     from tempfile import TemporaryDirectory
-    from .scene import load_config, build_scene
-    from .simulation import Simulation
+    from .environment.scene import load_config, build_scene
+    from .environment.simulation import Simulation
     from mujoco_tools.viewer import view_static
     from mujoco_tools.cameras import camera_id
 
@@ -74,8 +74,8 @@ def view_scene(args):
 def snapshot_scene(args):
     """Save static initial-state pictures without starting collection."""
     backend = _configure_gl(args.backend)
-    from .scene import load_config
-    from .snapshot import render_snapshot
+    from .environment.scene import load_config
+    from .environment.snapshot import render_snapshot
 
     result = render_snapshot(load_config(args.config), args.output, width=args.width)
     result['backend'] = backend
@@ -88,10 +88,10 @@ def collect(args):
     import numpy as np
     import yaml
     import mujoco
-    from .scene import load_config, build_scene
-    from .simulation import Simulation
-    from .expert import Expert
-    from .dataset import EpisodeWriter, validate_episode
+    from .environment.scene import load_config, build_scene
+    from .environment.simulation import Simulation
+    from .control.expert import Expert
+    from .data.dataset import EpisodeWriter, validate_episode
 
     cfg = load_config(args.config)
     if args.width:
@@ -178,7 +178,7 @@ def collect(args):
                     result['success'] = False
                     result['failure_reason'] = 'dataset_validation_failed'
                 else:
-                    from .replay import generate_head_video
+                    from .data.replay import generate_head_video
                     result['video'] = str(generate_head_video(path, episode_output / f'{stem}.mp4'))
             _print({k: result[k] for k in ('seed', 'success', 'failure_reason', 'steps', 'recorded_frames', 'metrics')})
         except Exception as exc:
@@ -194,7 +194,7 @@ def collect(args):
         success_rate=sum(x['success'] for x in summaries)/len(summaries),
         results=summaries)
     if args.video and not args.no_images:
-        from .replay import generate_preview
+        from .data.replay import generate_preview
         video_path = OUTPUTS_DIR / 'insert_plug' / 'previews' / output.name / 'preview.mp4'
         generate_preview(summaries[0]['dataset'], video_path)
         print(f'Video: {video_path}', flush=True)
@@ -205,9 +205,9 @@ def collect(args):
 def plan_scene(args):
     """Export the complete nominal task without stepping or recording images."""
     from tempfile import TemporaryDirectory
-    from .scene import load_config, build_scene
-    from .simulation import Simulation
-    from .planning import TaskPlanner
+    from .environment.scene import load_config, build_scene
+    from .environment.simulation import Simulation
+    from .control.planning import TaskPlanner
     cfg = load_config(args.config)
     with TemporaryDirectory(prefix='insert-plug-plan-') as folder:
         sim = Simulation(build_scene(cfg, Path(folder)/'scene.xml'), cfg, render=False)
@@ -250,7 +250,7 @@ def rollout_policy(args):
     position = choose('position', 'config')
     position = None if position is None or str(position) == 'config' else str(position)
     backend = _configure_gl('glfw' if args.viewer else args.backend)
-    from .rollout import run_rollouts
+    from .policy.rollout import run_rollouts
 
     result = run_rollouts(
         checkpoint=workspace_path(checkpoint),
@@ -270,7 +270,7 @@ def rollout_policy(args):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
-    rollout = sub.add_parser('rollout', help='Run a trained LeRobot ACT policy in closed-loop simulation')
+    rollout = sub.add_parser('rollout', help='Run a trained LeRobot ACT or Diffusion policy in closed-loop simulation')
     rollout.add_argument('--policy-config', default=str(ROOT / 'config' / 'insert_plug_policy.yaml'))
     rollout.add_argument('--checkpoint', help='Checkpoint step directory or its pretrained_model directory')
     rollout.add_argument('--config', help='Scene YAML (overrides scene_config in policy YAML)')
@@ -278,7 +278,7 @@ def main(argv=None):
     rollout.add_argument('--position', choices=['config', 'all'] + [str(i) for i in range(10)],
                          help='Use scene-config positions, one saved layout, or all ten layouts')
     rollout.add_argument('--device', choices=['auto', 'cpu', 'cuda'])
-    rollout.add_argument('--n-action-steps', type=int, help='Actions executed per ACT prediction (defaults to policy YAML)')
+    rollout.add_argument('--n-action-steps', type=int, help='Actions executed per policy prediction (defaults to policy YAML)')
     rollout.add_argument('--duration', type=float, help='Maximum simulated seconds per episode (default: 60)')
     rollout.add_argument('--episodes', type=int, default=1, help='Episodes per selected layout')
     rollout.add_argument('--seed', type=int, default=0)
@@ -354,7 +354,7 @@ def main(argv=None):
             parser.error('episodes must be positive and randomize-mm must be nonnegative')
         return sys.exit(collect(args))
     if args.command == 'build':
-        from .scene import load_config, build_scene
+        from .environment.scene import load_config, build_scene
         print(build_scene(load_config(args.config), args.output))
     elif args.command == 'doctor':
         from mujoco_tools.doctor import run_diagnostics
@@ -362,12 +362,12 @@ def main(argv=None):
         _print(result)
         sys.exit(0 if result['ok'] else 2)
     elif args.command == 'validate':
-        from .dataset import validate_episode
+        from .data.dataset import validate_episode
         result = validate_episode(args.path)
         _print(result)
         sys.exit(0 if result['valid'] else 2)
     elif args.command == 'preview':
-        from .replay import generate_preview
+        from .data.replay import generate_preview
         print(generate_preview(args.path, args.output))
 
 

@@ -26,13 +26,14 @@ dev = ["pytest>=8"]
 insert-plug = "examples.insert_plug.cli:main"
 mujoco-doctor = "mujoco_tools.doctor:main"
 
-[tool.setuptools]
-packages = ["mujoco_tools", "examples", "examples.insert_plug"]
+[tool.setuptools.packages.find]
+where = ["src", "."]
+include = ["mujoco_tools*", "examples*"]
+namespaces = false
 
 [tool.setuptools.package-dir]
 "" = "src"
 examples = "examples"
-"examples.insert_plug" = "examples/insert_plug"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

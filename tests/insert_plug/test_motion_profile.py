@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from examples.insert_plug.planning import PlanningError, _motion_profile, _profile_bounds, _quintic_positions
+from examples.insert_plug.control.planning import PlanningError, _motion_profile, _profile_bounds, _quintic_positions
 
 
 @pytest.mark.parametrize('profile,ramp', [

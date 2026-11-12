@@ -4,8 +4,8 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from examples.insert_plug.expert import Expert
-from examples.insert_plug.execution_guard import ExecutionSafetyError
+from examples.insert_plug.control.expert import Expert
+from examples.insert_plug.control.execution_guard import ExecutionSafetyError
 
 
 def _result_expert(final_checks):

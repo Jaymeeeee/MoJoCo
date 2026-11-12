@@ -3,10 +3,10 @@
 import numpy as np
 import pytest
 
-from examples.insert_plug.expert import Expert
-from examples.insert_plug.recording import ALIGNED_ACTION_TIMING, LEGACY_ACTION_TIMING, RecordingSampler
-from examples.insert_plug.scene import build_scene, load_config
-from examples.insert_plug.simulation import Simulation
+from examples.insert_plug.control.expert import Expert
+from examples.insert_plug.data.recording import ALIGNED_ACTION_TIMING, LEGACY_ACTION_TIMING, RecordingSampler
+from examples.insert_plug.environment.scene import build_scene, load_config
+from examples.insert_plug.environment.simulation import Simulation
 
 
 def test_fifteen_hz_uses_physics_ticks_without_control_step_jitter_or_drift():
