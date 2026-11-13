@@ -1,0 +1,138 @@
+{
+  "dataset": "insert_plug_v2",
+  "completed_at": "2026-11-12T15:02:25.571742+08:00",
+  "format": "insert-plug-v3 HDF5; raw demonstrations, not LeRobot export",
+  "episode_directory": "bags/episode_{episode_id:06d}",
+  "episode_ids": [
+    1,
+    100
+  ],
+  "files_per_episode": [
+    "h5",
+    "yaml",
+    "xml",
+    "mp4"
+  ],
+  "recording_hz": 10,
+  "control_hz": 10,
+  "physics_hz": 1000,
+  "cameras": [
+    "head",
+    "wrist"
+  ],
+  "rgb_shape": [
+    256,
+    256,
+    3
+  ],
+  "depth_shape": [
+    256,
+    256
+  ],
+  "depth_units": "m",
+  "video_camera": "head",
+  "regions": {
+    "source": {
+      "center_xy": [
+        0.45,
+        -0.07
+      ],
+      "outer_side_m": 0.11,
+      "ood_side_m": 0.04,
+      "outer_bounds_m": {
+        "x": [
+          0.395,
+          0.505
+        ],
+        "y": [
+          -0.125,
+          -0.015
+        ]
+      },
+      "ood_bounds_m": {
+        "x": [
+          0.43,
+          0.47
+        ],
+        "y": [
+          -0.09,
+          -0.05
+        ]
+      },
+      "ood_boundary_excluded_from_training": true,
+      "ind_area_m2": 0.010499999999999999
+    },
+    "target": {
+      "center_xy": [
+        0.45,
+        0.07
+      ],
+      "outer_side_m": 0.11,
+      "ood_side_m": 0.04,
+      "outer_bounds_m": {
+        "x": [
+          0.395,
+          0.505
+        ],
+        "y": [
+          0.015,
+          0.125
+        ]
+      },
+      "ood_bounds_m": {
+        "x": [
+          0.43,
+          0.47
+        ],
+        "y": [
+          0.05,
+          0.09
+        ]
+      },
+      "ood_boundary_excluded_from_training": true,
+      "ind_area_m2": 0.010499999999999999
+    }
+  },
+  "sampling": {
+    "method": "equal_area_square_ring_stratification",
+    "seed": 20261112,
+    "faces": 4,
+    "radial_squared_bins": 5,
+    "tangent_bins": 5,
+    "points_per_region": 100,
+    "points_per_stratum": 1,
+    "stratum_area_m2": 0.00010499999999999999,
+    "pairing": "randomized one-to-one; each face pair receives 6 or 7 layouts",
+    "coordinate_rounding": false,
+    "policy_outcomes_used": false,
+    "failed_layouts_automatically_replaced": false
+  },
+  "unique_source_positions": 100,
+  "unique_target_positions": 100,
+  "original_pairs_replaced": 0,
+  "results": {
+    "episodes": 100,
+    "passed": 100,
+    "total_frames": 19072,
+    "fully_decoded_video_frames": 19072,
+    "total_bytes": 6913679027,
+    "duration_min_s": 18.4,
+    "duration_max_s": 20.4,
+    "duration_mean_s": 19.072,
+    "episodes_at_least_20_seconds": 4,
+    "action_replay_episodes": 100,
+    "action_replay_passed": 100,
+    "replay_max_joint_deviation_rad": 0.0,
+    "replay_max_peg_deviation_m": 0.0,
+    "collision_checked_episodes": 0,
+    "unsafe_contact_count": null
+  },
+  "manifest_sha256": "6119f3cc2ac7aef5fa1f29d4dd52660400f79e82c08e33be4eddf95b560cb268",
+  "audit": {
+    "path": "outputs/_checks/insert_plug_v2_collection/raw_and_replay_audit.json",
+    "sha256": "d1c871ee2961666de895047c3c084e5bae3727f2bc80bb348aa212b8495586c3",
+    "valid": true,
+    "complete": true
+  },
+  "source_data_unchanged_during_replay": true
+}

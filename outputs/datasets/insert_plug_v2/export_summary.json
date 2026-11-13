@@ -1,0 +1,64 @@
+{
+  "dataset": "insert_plug_v2",
+  "format": "lerobot-v3",
+  "lerobot_version": "0.7.1",
+  "completed_at": "2026-11-12T16:01:50.525676+08:00",
+  "output": "lerobot/",
+  "source": "bags/",
+  "episodes": 100,
+  "frames": 19072,
+  "fps": 10,
+  "files": 108,
+  "total_bytes": 5883660250,
+  "features": [
+    "observation.images.head",
+    "observation.images.wrist",
+    "observation.depth.head",
+    "observation.depth.wrist",
+    "observation.state",
+    "action"
+  ],
+  "rgb_encoding": "H.264, lossy",
+  "depth_storage": "float32 TIFF bytes embedded in Parquet, lossless meters",
+  "source_episode_ids": [
+    1,
+    100
+  ],
+  "lerobot_episode_indices": [
+    0,
+    99
+  ],
+  "raw_files_unchanged": true,
+  "validation_report": "lerobot/meta/export_validation.json",
+  "validation": {
+    "official_reader_samples_checked": 300,
+    "worst_rgb_mean_absolute_error_255": 1.3981679280598958,
+    "all_depth_pixels_bitwise_equal": true,
+    "depth_frames_checked": 19072,
+    "all_actions_equal_source_float32": true,
+    "all_states_equal_source_float32": true,
+    "all_source_timestamps_exact": true,
+    "all_source_phases_equal": true,
+    "scalar_frames_checked": 19072,
+    "action_float32_conversion_lossless": true,
+    "episodes": 100,
+    "frames": 19072,
+    "fps": 10,
+    "published_reader_samples_checked": 12,
+    "published_reader_indices": [
+      0,
+      192,
+      2089,
+      4005,
+      5907,
+      7834,
+      9722,
+      11626,
+      13529,
+      15433,
+      17354,
+      19071
+    ]
+  },
+  "provenance_report": "outputs/_checks/insert_plug_v2_export/source_integrity_after.json"
+}

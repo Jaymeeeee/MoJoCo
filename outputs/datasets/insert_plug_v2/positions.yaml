@@ -1,0 +1,3193 @@
+format_version: 2
+dataset_version: insert_plug_v2
+split: ind
+base_config: config/insert_plug.yaml
+base_config_sha256: b3a1932e9b4d283479b5c0959726b51ca168f843f7c9ca69d1038ff22da98826
+base_source_xy:
+- 0.45
+- -0.07
+base_target_xy:
+- 0.45
+- 0.07
+regions:
+  source:
+    center_xy:
+    - 0.45
+    - -0.07
+    outer_side_m: 0.11
+    ood_side_m: 0.04
+    outer_bounds_m:
+      x:
+      - 0.395
+      - 0.505
+      y:
+      - -0.125
+      - -0.015
+    ood_bounds_m:
+      x:
+      - 0.43
+      - 0.47
+      y:
+      - -0.09
+      - -0.05
+    ood_boundary_excluded_from_training: true
+    ind_area_m2: 0.010499999999999999
+  target:
+    center_xy:
+    - 0.45
+    - 0.07
+    outer_side_m: 0.11
+    ood_side_m: 0.04
+    outer_bounds_m:
+      x:
+      - 0.395
+      - 0.505
+      y:
+      - 0.015
+      - 0.125
+    ood_bounds_m:
+      x:
+      - 0.43
+      - 0.47
+      y:
+      - 0.05
+      - 0.09
+    ood_boundary_excluded_from_training: true
+    ind_area_m2: 0.010499999999999999
+sampling:
+  method: equal_area_square_ring_stratification
+  seed: 20261112
+  faces: 4
+  radial_squared_bins: 5
+  tangent_bins: 5
+  points_per_region: 100
+  points_per_stratum: 1
+  stratum_area_m2: 0.00010499999999999999
+  pairing: randomized one-to-one; each face pair receives 6 or 7 layouts
+  coordinate_rounding: false
+  policy_outcomes_used: false
+  failed_layouts_automatically_replaced: false
+selection_seed: 20261112
+episodes_per_position: 1
+expected_episodes: 100
+first_episode_id: 1
+recording_hz: 10.0
+control_hz: 10.0
+depth_enabled: true
+required_edge_margin_px: 5.0
+geometry_frozen: true
+selection_complete: true
+physics_validated: true
+occlusion_checked: false
+positions:
+- name: pos0
+  episode_id: 1
+  source_xy:
+  - 0.4932826231222046
+  - -0.030047827163091893
+  target_xy:
+  - 0.4201221351316294
+  - 0.10751204046457215
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 2
+    tangent_bin: 4
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 1
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 19.200000000000482
+    control_steps: 192
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 59.18025352484915
+    final:
+      all_inside: true
+      min_edge_margin_px: 56.87582646875981
+- name: pos1
+  episode_id: 2
+  source_xy:
+  - 0.4364636480140784
+  - -0.03980283491625393
+  target_xy:
+  - 0.40579261137999806
+  - 0.0941130341626812
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 0
+    tangent_bin: 3
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 2
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 68.33166339975003
+    final:
+      all_inside: true
+      min_edge_margin_px: 66.21953093516655
+- name: pos2
+  episode_id: 3
+  source_xy:
+  - 0.41833053274853493
+  - -0.06427742749229672
+  target_xy:
+  - 0.40392198250080347
+  - 0.047835358033090414
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 1
+    tangent_bin: 2
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 3
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 82.5343781042484
+    final:
+      all_inside: true
+      min_edge_margin_px: 84.12017063803589
+- name: pos3
+  episode_id: 4
+  source_xy:
+  - 0.478138630289936
+  - -0.05463435786614449
+  target_xy:
+  - 0.42608395572078506
+  - 0.09643939320390402
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 0
+    tangent_bin: 3
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 0
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 19.10000000000036
+    control_steps: 191
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 65.02803317308911
+    final:
+      all_inside: true
+      min_edge_margin_px: 62.794251932280304
+- name: pos4
+  episode_id: 5
+  source_xy:
+  - 0.40584253826340566
+  - -0.032328106133328365
+  target_xy:
+  - 0.49371578015708784
+  - 0.060084147901760664
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 2
+    tangent_bin: 0
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 2
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 81.05611702066338
+    final:
+      all_inside: true
+      min_edge_margin_px: 79.12937827270173
+- name: pos5
+  episode_id: 6
+  source_xy:
+  - 0.49962584891465
+  - -0.01655049727397516
+  target_xy:
+  - 0.4647806136574726
+  - 0.10048053808075331
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 4
+    tangent_bin: 0
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 1
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 58.33606773654316
+    final:
+      all_inside: true
+      min_edge_margin_px: 55.83702462426828
+- name: pos6
+  episode_id: 7
+  source_xy:
+  - 0.44850651238746053
+  - -0.11284888403732103
+  target_xy:
+  - 0.40094552325086963
+  - 0.06057600028584795
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 2
+    tangent_bin: 2
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 3
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.300000000000605
+    control_steps: 193
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 50.121412439155606
+    final:
+      all_inside: true
+      min_edge_margin_px: 52.68133656322066
+- name: pos7
+  episode_id: 8
+  source_xy:
+  - 0.4491175762740379
+  - -0.0298406332147306
+  target_xy:
+  - 0.4578658727961961
+  - 0.02691092592971296
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 2
+    tangent_bin: 2
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 2
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 97.62726716720374
+    final:
+      all_inside: true
+      min_edge_margin_px: 97.62726716720374
+- name: pos8
+  episode_id: 9
+  source_xy:
+  - 0.4274335145164729
+  - -0.08894320402580906
+  target_xy:
+  - 0.43283487896453127
+  - 0.1163050518506051
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 0
+    tangent_bin: 4
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 3
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.50000000000085
+    control_steps: 195
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 52.5410587347792
+    final:
+      all_inside: true
+      min_edge_margin_px: 50.07884607087996
+- name: pos9
+  episode_id: 10
+  source_xy:
+  - 0.48856541156372846
+  - -0.04720729203804666
+  target_xy:
+  - 0.4197862556998745
+  - 0.06984507624908402
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 2
+    tangent_bin: 3
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 0
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 80.86825315641397
+    final:
+      all_inside: true
+      min_edge_margin_px: 79.16721159221075
+- name: pos10
+  episode_id: 11
+  source_xy:
+  - 0.49581225476330115
+  - -0.051041035125043745
+  target_xy:
+  - 0.4874468872126475
+  - 0.06629340714980023
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 3
+    tangent_bin: 3
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 1
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.10000000000036
+    control_steps: 191
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 77.63184058013658
+    final:
+      all_inside: true
+      min_edge_margin_px: 75.56368594522269
+- name: pos11
+  episode_id: 12
+  source_xy:
+  - 0.4754639918087085
+  - -0.12015092764880757
+  target_xy:
+  - 0.40771583935392003
+  - 0.05669002103177018
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 4
+    tangent_bin: 3
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 2
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.50000000000085
+    control_steps: 195
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 41.65709546065787
+    final:
+      all_inside: true
+      min_edge_margin_px: 44.47322585480026
+- name: pos12
+  episode_id: 13
+  source_xy:
+  - 0.4580223602363372
+  - -0.030583365279994647
+  target_xy:
+  - 0.40203513575609656
+  - 0.12326087083837055
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 2
+    tangent_bin: 1
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 4
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 52.19288529209018
+    final:
+      all_inside: true
+      min_edge_margin_px: 49.84533370737964
+- name: pos13
+  episode_id: 14
+  source_xy:
+  - 0.42701855832665153
+  - -0.02866794086282788
+  target_xy:
+  - 0.40955505907840095
+  - 0.1058267039088124
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 2
+    tangent_bin: 3
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 2
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.59999999999975
+    control_steps: 186
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 61.27909369059739
+    final:
+      all_inside: true
+      min_edge_margin_px: 59.04390112913208
+- name: pos14
+  episode_id: 15
+  source_xy:
+  - 0.49322351115473
+  - -0.09724684430159755
+  target_xy:
+  - 0.4882932355201025
+  - 0.08870552921606345
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 2
+    tangent_bin: 0
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 2
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.700000000001094
+    control_steps: 197
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 54.21340935726871
+    final:
+      all_inside: true
+      min_edge_margin_px: 56.907268397169304
+- name: pos15
+  episode_id: 16
+  source_xy:
+  - 0.4786926353771342
+  - -0.08839382848834151
+  target_xy:
+  - 0.47303943387534253
+  - 0.036757887837381875
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 0
+    tangent_bin: 0
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 1
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 61.90816951476228
+    final:
+      all_inside: true
+      min_edge_margin_px: 64.39893681871504
+- name: pos16
+  episode_id: 17
+  source_xy:
+  - 0.42989450707626414
+  - -0.034418577690928036
+  target_xy:
+  - 0.500960024466891
+  - 0.10595427923005596
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 1
+    tangent_bin: 3
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 4
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 50.08688020042044
+    final:
+      all_inside: true
+      min_edge_margin_px: 47.26575402512785
+- name: pos17
+  episode_id: 18
+  source_xy:
+  - 0.4528102051413311
+  - -0.0958191497838859
+  target_xy:
+  - 0.4479769466380791
+  - 0.11237291351950796
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 0
+    tangent_bin: 2
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 2
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.700000000001094
+    control_steps: 197
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 53.03745739208463
+    final:
+      all_inside: true
+      min_edge_margin_px: 50.52096599186896
+- name: pos18
+  episode_id: 19
+  source_xy:
+  - 0.4776210356947767
+  - -0.1114982815212189
+  target_xy:
+  - 0.4933096606126882
+  - 0.06629618904637653
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 2
+    tangent_bin: 4
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 2
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.50000000000085
+    control_steps: 195
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 46.96782201197315
+    final:
+      all_inside: true
+      min_edge_margin_px: 49.71374060865595
+- name: pos19
+  episode_id: 20
+  source_xy:
+  - 0.42223633791071263
+  - -0.0438890666715181
+  target_xy:
+  - 0.4740510540739265
+  - 0.10446018719855449
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 0
+    tangent_bin: 0
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 1
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 54.68083617790302
+    final:
+      all_inside: true
+      min_edge_margin_px: 52.07434354119667
+- name: pos20
+  episode_id: 21
+  source_xy:
+  - 0.44351328323858646
+  - -0.09612402527663122
+  target_xy:
+  - 0.4756544219445854
+  - 0.01660147914203816
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 0
+    tangent_bin: 1
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 4
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 61.051828008196296
+    final:
+      all_inside: true
+      min_edge_margin_px: 63.411191436917846
+- name: pos21
+  episode_id: 22
+  source_xy:
+  - 0.48601246214196037
+  - -0.02748164395963889
+  target_xy:
+  - 0.45401445140403446
+  - 0.04320088798627035
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 2
+    tangent_bin: 0
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 0
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 87.31406137613448
+    final:
+      all_inside: true
+      min_edge_margin_px: 87.31406137613448
+- name: pos22
+  episode_id: 23
+  source_xy:
+  - 0.4277334013827993
+  - -0.10047611352167002
+  target_xy:
+  - 0.4356470085922721
+  - 0.03607511293570151
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 1
+    tangent_bin: 0
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 1
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 60.17031575408485
+    final:
+      all_inside: true
+      min_edge_margin_px: 62.483548791547676
+- name: pos23
+  episode_id: 24
+  source_xy:
+  - 0.39984330616642666
+  - -0.03466758539652689
+  target_xy:
+  - 0.43215516203648097
+  - 0.04136636197938921
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 4
+    tangent_bin: 0
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 0
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.399999999999505
+    control_steps: 184
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 96.39954104856855
+    final:
+      all_inside: true
+      min_edge_margin_px: 95.34400738751094
+- name: pos24
+  episode_id: 25
+  source_xy:
+  - 0.4846798555435026
+  - -0.02518058106846241
+  target_xy:
+  - 0.39975200287931056
+  - 0.0614370489929303
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 3
+    tangent_bin: 0
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 4
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 86.89560086126366
+    final:
+      all_inside: true
+      min_edge_margin_px: 85.50016871751325
+- name: pos25
+  episode_id: 26
+  source_xy:
+  - 0.4640482631325348
+  - -0.04958698395834785
+  target_xy:
+  - 0.49861472912700633
+  - 0.02833355471011595
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 0
+    tangent_bin: 0
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 3
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 82.35978464933197
+    final:
+      all_inside: true
+      min_edge_margin_px: 82.35978464933197
+- name: pos26
+  episode_id: 27
+  source_xy:
+  - 0.4258406231792804
+  - -0.11414360603192146
+  target_xy:
+  - 0.43333671154838194
+  - 0.022990366087273194
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 2
+    tangent_bin: 1
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 3
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 52.22300227000385
+    final:
+      all_inside: true
+      min_edge_margin_px: 54.655854505949115
+- name: pos27
+  episode_id: 28
+  source_xy:
+  - 0.49091889668951716
+  - -0.12383944344145166
+  target_xy:
+  - 0.40203069889472326
+  - 0.08602879298773336
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 4
+    tangent_bin: 4
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 3
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 20.100000000001582
+    control_steps: 201
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 36.759419519635124
+    final:
+      all_inside: true
+      min_edge_margin_px: 39.72940205701488
+- name: pos28
+  episode_id: 29
+  source_xy:
+  - 0.40104772080668666
+  - -0.05462427401305643
+  target_xy:
+  - 0.41162270378405497
+  - 0.11361552173096587
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 3
+    tangent_bin: 1
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 2
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 56.59182071672126
+    final:
+      all_inside: true
+      min_edge_margin_px: 54.27570771746531
+- name: pos29
+  episode_id: 30
+  source_xy:
+  - 0.47264599104389227
+  - -0.11193491526960195
+  target_xy:
+  - 0.4100605194105152
+  - 0.029389478381677617
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 2
+    tangent_bin: 3
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 2
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 19.200000000000482
+    control_steps: 192
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 47.396747367315974
+    final:
+      all_inside: true
+      min_edge_margin_px: 50.11144101802601
+- name: pos30
+  episode_id: 31
+  source_xy:
+  - 0.4273420548328587
+  - -0.09655728554462858
+  target_xy:
+  - 0.4806671016904288
+  - 0.07699308102076499
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 0
+    tangent_bin: 0
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 1
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.300000000000605
+    control_steps: 193
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 62.55795737158826
+    final:
+      all_inside: true
+      min_edge_margin_px: 64.83157554622444
+- name: pos31
+  episode_id: 32
+  source_xy:
+  - 0.4153625536557952
+  - -0.030842380784144113
+  target_xy:
+  - 0.4590902852832215
+  - 0.11085716848650112
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 2
+    tangent_bin: 4
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 2
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 52.567850805926525
+    final:
+      all_inside: true
+      min_edge_margin_px: 49.99356530554283
+- name: pos32
+  episode_id: 33
+  source_xy:
+  - 0.4030632320307139
+  - -0.1164316077870426
+  target_xy:
+  - 0.43692762845510386
+  - 0.030321223188937325
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 3
+    tangent_bin: 4
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 2
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 53.61555717467108
+    final:
+      all_inside: true
+      min_edge_margin_px: 55.94079970699093
+- name: pos33
+  episode_id: 34
+  source_xy:
+  - 0.4110522894671295
+  - -0.06504675721816566
+  target_xy:
+  - 0.4234106122603359
+  - 0.07985083863900463
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 2
+    tangent_bin: 2
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 0
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 74.90475852406675
+    final:
+      all_inside: true
+      min_edge_margin_px: 72.9321506893495
+- name: pos34
+  episode_id: 35
+  source_xy:
+  - 0.49959264219448135
+  - -0.11894665206751551
+  target_xy:
+  - 0.4180926264895049
+  - 0.05155078192020204
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 3
+    tangent_bin: 0
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 1
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.700000000001094
+    control_steps: 197
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 38.61347652381457
+    final:
+      all_inside: true
+      min_edge_margin_px: 41.60179543270482
+- name: pos35
+  episode_id: 36
+  source_xy:
+  - 0.504077339048037
+  - -0.1093994944968108
+  target_xy:
+  - 0.4179148630175504
+  - 0.11680812758802232
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 4
+    tangent_bin: 0
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 3
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 20.40000000000195
+    control_steps: 204
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 44.39936388542923
+    final:
+      all_inside: true
+      min_edge_margin_px: 47.32143269419301
+- name: pos36
+  episode_id: 37
+  source_xy:
+  - 0.4133215239695606
+  - -0.12436641205111992
+  target_xy:
+  - 0.5003690882468043
+  - 0.06249161684072313
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 4
+    tangent_bin: 0
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 4
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.50000000000085
+    control_steps: 195
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 47.75848256175858
+    final:
+      all_inside: true
+      min_edge_margin_px: 50.212945340956885
+- name: pos37
+  episode_id: 38
+  source_xy:
+  - 0.4084840165444451
+  - -0.0884613988328087
+  target_xy:
+  - 0.39806932277473284
+  - 0.05742196403607144
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 2
+    tangent_bin: 3
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 4
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 69.20710963425336
+    final:
+      all_inside: true
+      min_edge_margin_px: 71.31036360621779
+- name: pos38
+  episode_id: 39
+  source_xy:
+  - 0.48143591076987535
+  - -0.05791094932990691
+  target_xy:
+  - 0.39510173368706036
+  - 0.12131081536108734
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 1
+    tangent_bin: 3
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 4
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 19.400000000000727
+    control_steps: 194
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 54.086223662484
+    final:
+      all_inside: true
+      min_edge_margin_px: 51.793295584225945
+- name: pos39
+  episode_id: 40
+  source_xy:
+  - 0.4471472892759125
+  - -0.10669057226607676
+  target_xy:
+  - 0.45649398741872793
+  - 0.09527925461258192
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 1
+    tangent_bin: 2
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 0
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 19.700000000001094
+    control_steps: 197
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 54.107985835560896
+    final:
+      all_inside: true
+      min_edge_margin_px: 56.596291756657095
+- name: pos40
+  episode_id: 41
+  source_xy:
+  - 0.4759533368717885
+  - -0.1001877217311074
+  target_xy:
+  - 0.4204969943080474
+  - 0.016185155494891718
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 0
+    tangent_bin: 4
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 4
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 54.56117031513319
+    final:
+      all_inside: true
+      min_edge_margin_px: 57.16737472171745
+- name: pos41
+  episode_id: 42
+  source_xy:
+  - 0.4800192745317022
+  - -0.08302846289337978
+  target_xy:
+  - 0.3994269995507902
+  - 0.031173999308682143
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 0
+    tangent_bin: 1
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 4
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 65.26547087966256
+    final:
+      all_inside: true
+      min_edge_margin_px: 67.70343837073257
+- name: pos42
+  episode_id: 43
+  source_xy:
+  - 0.4609143549057182
+  - -0.039858537272514136
+  target_xy:
+  - 0.4838397952815274
+  - 0.030064024279507863
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 0
+    tangent_bin: 1
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 2
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 88.1461942233488
+    final:
+      all_inside: true
+      min_edge_margin_px: 88.1461942233488
+- name: pos43
+  episode_id: 44
+  source_xy:
+  - 0.49836306536985614
+  - -0.0789114961082488
+  target_xy:
+  - 0.5033968331145393
+  - 0.09304955225986192
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 3
+    tangent_bin: 2
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 4
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.400000000000727
+    control_steps: 194
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 58.40072816909199
+    final:
+      all_inside: true
+      min_edge_margin_px: 55.72099304803072
+- name: pos44
+  episode_id: 45
+  source_xy:
+  - 0.4616573673389144
+  - -0.015378736923488415
+  target_xy:
+  - 0.4699644137147398
+  - 0.03604607874850321
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 4
+    tangent_bin: 1
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 1
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 93.31531938820044
+    final:
+      all_inside: true
+      min_edge_margin_px: 93.31531938820044
+- name: pos45
+  episode_id: 46
+  source_xy:
+  - 0.3986704558978279
+  - -0.11739904614264128
+  target_xy:
+  - 0.4005246310152255
+  - 0.032086727203962204
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 4
+    tangent_bin: 4
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 3
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 53.57205574738344
+    final:
+      all_inside: true
+      min_edge_margin_px: 55.88218169191453
+- name: pos46
+  episode_id: 47
+  source_xy:
+  - 0.4189037647324344
+  - -0.06044409991460704
+  target_xy:
+  - 0.4790795952854565
+  - 0.07056702049876773
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 1
+    tangent_bin: 1
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 0
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 75.68040488899342
+    final:
+      all_inside: true
+      min_edge_margin_px: 73.54786078201775
+- name: pos47
+  episode_id: 48
+  source_xy:
+  - 0.4350710631632018
+  - -0.047823379011826636
+  target_xy:
+  - 0.4119621136927987
+  - 0.04596795542229067
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 0
+    tangent_bin: 4
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 1
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 91.25169490045744
+    final:
+      all_inside: true
+      min_edge_margin_px: 92.50849872853057
+- name: pos48
+  episode_id: 49
+  source_xy:
+  - 0.5005409258394856
+  - -0.040751962116984314
+  target_xy:
+  - 0.44530606150284785
+  - 0.09715956382796428
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 4
+    tangent_bin: 3
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 0
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.10000000000036
+    control_steps: 191
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 62.592072073825875
+    final:
+      all_inside: true
+      min_edge_margin_px: 60.24580995919345
+- name: pos49
+  episode_id: 50
+  source_xy:
+  - 0.4091442605827331
+  - -0.015742201914345083
+  target_xy:
+  - 0.49170526842367773
+  - 0.03974919549927191
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 4
+    tangent_bin: 4
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 2
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.59999999999975
+    control_steps: 186
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 85.10340238234141
+    final:
+      all_inside: true
+      min_edge_margin_px: 85.10340238234141
+- name: pos50
+  episode_id: 51
+  source_xy:
+  - 0.4810810514555371
+  - -0.04398182000325257
+  target_xy:
+  - 0.4381094203288388
+  - 0.04109663973907333
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 1
+    tangent_bin: 4
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 0
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 89.19375544913467
+    final:
+      all_inside: true
+      min_edge_margin_px: 89.19375544913467
+- name: pos51
+  episode_id: 52
+  source_xy:
+  - 0.4070203269525593
+  - -0.10447040127823351
+  target_xy:
+  - 0.47687304906265643
+  - 0.042344512164457046
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 2
+    tangent_bin: 4
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 0
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 60.075118895076805
+    final:
+      all_inside: true
+      min_edge_margin_px: 62.31483054813205
+- name: pos52
+  episode_id: 53
+  source_xy:
+  - 0.39986045975754697
+  - -0.040570301669611245
+  target_xy:
+  - 0.5023054693155063
+  - 0.029032039390065573
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 4
+    tangent_bin: 1
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 4
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.59999999999975
+    control_steps: 186
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 80.86627977607844
+    final:
+      all_inside: true
+      min_edge_margin_px: 80.86627977607844
+- name: pos53
+  episode_id: 54
+  source_xy:
+  - 0.40374254718890157
+  - -0.09334849681009605
+  target_xy:
+  - 0.5038875998367501
+  - 0.05761191624014821
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 3
+    tangent_bin: 3
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 4
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 19.10000000000036
+    control_steps: 191
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 66.82975293077622
+    final:
+      all_inside: true
+      min_edge_margin_px: 68.95406890543988
+- name: pos54
+  episode_id: 55
+  source_xy:
+  - 0.4227659041937395
+  - -0.037564288962323236
+  target_xy:
+  - 0.40230604999144004
+  - 0.0175162482672638
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 1
+    tangent_bin: 4
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 4
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.59999999999975
+    control_steps: 186
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 98.07048699345312
+    final:
+      all_inside: true
+      min_edge_margin_px: 99.01794579302407
+- name: pos55
+  episode_id: 56
+  source_xy:
+  - 0.4586419442545651
+  - -0.01932827977991785
+  target_xy:
+  - 0.4485017858216679
+  - 0.10773877119436046
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 4
+    tangent_bin: 2
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 1
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 55.79663988133623
+    final:
+      all_inside: true
+      min_edge_margin_px: 53.32352229940324
+- name: pos56
+  episode_id: 57
+  source_xy:
+  - 0.4836162491724107
+  - -0.07266274179243133
+  target_xy:
+  - 0.40915160524759175
+  - 0.0683738542766608
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 1
+    tangent_bin: 2
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 2
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.10000000000036
+    control_steps: 191
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 71.69300202134932
+    final:
+      all_inside: true
+      min_edge_margin_px: 73.95673585732835
+- name: pos57
+  episode_id: 58
+  source_xy:
+  - 0.4972083927530956
+  - -0.034920724168305446
+  target_xy:
+  - 0.4457679298760719
+  - 0.015963609036098628
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 3
+    tangent_bin: 4
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 4
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 82.92369938303904
+    final:
+      all_inside: true
+      min_edge_margin_px: 82.92369938303904
+- name: pos58
+  episode_id: 59
+  source_xy:
+  - 0.42602208418058873
+  - -0.11498399899759465
+  target_xy:
+  - 0.4285958173283505
+  - 0.05901569112901909
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 3
+    tangent_bin: 1
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 0
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.200000000000482
+    control_steps: 192
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 51.69895079514864
+    final:
+      all_inside: true
+      min_edge_margin_px: 54.140871015061826
+- name: pos59
+  episode_id: 60
+  source_xy:
+  - 0.48051738504539127
+  - -0.10167293936221657
+  target_xy:
+  - 0.4613511050264814
+  - 0.12455166669909129
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 1
+    tangent_bin: 4
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 4
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 20.00000000000146
+    control_steps: 200
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 43.7346334549195
+    final:
+      all_inside: true
+      min_edge_margin_px: 41.01505945716852
+- name: pos60
+  episode_id: 61
+  source_xy:
+  - 0.4731916666161206
+  - -0.05042223787010699
+  target_xy:
+  - 0.4320457337530053
+  - 0.10291123819520037
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 0
+    tangent_bin: 4
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 1
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.10000000000036
+    control_steps: 191
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 60.58236001826339
+    final:
+      all_inside: true
+      min_edge_margin_px: 58.25446998504441
+- name: pos61
+  episode_id: 62
+  source_xy:
+  - 0.49566058154637493
+  - -0.09066838875666922
+  target_xy:
+  - 0.4232952738938386
+  - 0.03704382630294225
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 3
+    tangent_bin: 1
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 1
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 19.200000000000482
+    control_steps: 192
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 58.31585319066769
+    final:
+      all_inside: true
+      min_edge_margin_px: 60.94795275240039
+- name: pos62
+  episode_id: 63
+  source_xy:
+  - 0.44508684372708873
+  - -0.02542033022492738
+  target_xy:
+  - 0.48623826053393315
+  - 0.10255165945818667
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 3
+    tangent_bin: 2
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 1
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 54.33691549656075
+    final:
+      all_inside: true
+      min_edge_margin_px: 51.66726772671416
+- name: pos63
+  episode_id: 64
+  source_xy:
+  - 0.491371327171157
+  - -0.08384413446941183
+  target_xy:
+  - 0.483676475322963
+  - 0.025360321433962017
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 2
+    tangent_bin: 1
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 3
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 19.10000000000036
+    control_steps: 191
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 63.42305511771371
+    final:
+      all_inside: true
+      min_edge_margin_px: 65.9437677012338
+- name: pos64
+  episode_id: 65
+  source_xy:
+  - 0.45767487880792035
+  - -0.035763396570332555
+  target_xy:
+  - 0.45137677499528883
+  - 0.033778877507467636
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 1
+    tangent_bin: 1
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 1
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 97.42803219300231
+    final:
+      all_inside: true
+      min_edge_margin_px: 97.69394319482984
+- name: pos65
+  episode_id: 66
+  source_xy:
+  - 0.5029332949707052
+  - -0.08622555664535513
+  target_xy:
+  - 0.4779254631847131
+  - 0.04480363813294043
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 4
+    tangent_bin: 1
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 0
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 19.200000000000482
+    control_steps: 192
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 60.40672724562409
+    final:
+      all_inside: true
+      min_edge_margin_px: 63.03602007366299
+- name: pos66
+  episode_id: 67
+  source_xy:
+  - 0.457176164990735
+  - -0.09646381395993474
+  target_xy:
+  - 0.47516036995426114
+  - 0.02278287189080614
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 0
+    tangent_bin: 3
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 3
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 59.269713828822596
+    final:
+      all_inside: true
+      min_edge_margin_px: 61.7137488995712
+- name: pos67
+  episode_id: 68
+  source_xy:
+  - 0.47420216988726765
+  - -0.03329040651414554
+  target_xy:
+  - 0.395843069647369
+  - 0.10145648307235342
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 1
+    tangent_bin: 0
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 4
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 65.12383231811299
+    final:
+      all_inside: true
+      min_edge_margin_px: 62.99681995115537
+- name: pos68
+  episode_id: 69
+  source_xy:
+  - 0.43333803499196766
+  - -0.10648363421944451
+  target_xy:
+  - 0.43511010203253764
+  - 0.11284150642375834
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 1
+    tangent_bin: 1
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 2
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.60000000000097
+    control_steps: 196
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 54.32665750987414
+    final:
+      all_inside: true
+      min_edge_margin_px: 51.8842792572122
+- name: pos69
+  episode_id: 70
+  source_xy:
+  - 0.4294450150046759
+  - -0.0690596963628246
+  target_xy:
+  - 0.4769435747334118
+  - 0.11227856504228506
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 0
+    tangent_bin: 2
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 2
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 19.300000000000605
+    control_steps: 193
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 49.306985869033525
+    final:
+      all_inside: true
+      min_edge_margin_px: 46.59410857258615
+- name: pos70
+  episode_id: 71
+  source_xy:
+  - 0.4359209188374879
+  - -0.018490110437808634
+  target_xy:
+  - 0.41212034529320324
+  - 0.06541275724093293
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 4
+    tangent_bin: 3
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 1
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 18.59999999999975
+    control_steps: 186
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 83.89847831519072
+    final:
+      all_inside: true
+      min_edge_margin_px: 82.34587448459891
+- name: pos71
+  episode_id: 72
+  source_xy:
+  - 0.4294461735408904
+  - -0.0745154091438946
+  target_xy:
+  - 0.46625875623949853
+  - 0.02637326864174696
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 0
+    tangent_bin: 3
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 2
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 75.56450435731293
+    final:
+      all_inside: true
+      min_edge_margin_px: 77.47158973368552
+- name: pos72
+  episode_id: 73
+  source_xy:
+  - 0.4704589078653811
+  - -0.024834499068494026
+  target_xy:
+  - 0.4867187034840549
+  - 0.03354252371526567
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 3
+    tangent_bin: 1
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 1
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 87.0422061713968
+    final:
+      all_inside: true
+      min_edge_margin_px: 87.0422061713968
+- name: pos73
+  episode_id: 74
+  source_xy:
+  - 0.42388451994112286
+  - -0.02221808110675972
+  target_xy:
+  - 0.45647504140217454
+  - 0.12435269357502926
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 3
+    tangent_bin: 3
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 4
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 44.55239041582689
+    final:
+      all_inside: true
+      min_edge_margin_px: 41.86562388217601
+- name: pos74
+  episode_id: 75
+  source_xy:
+  - 0.41124566088635306
+  - -0.05534422217889934
+  target_xy:
+  - 0.4958165070433239
+  - 0.08939273975841881
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 2
+    tangent_bin: 1
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 3
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 61.77349682041506
+    final:
+      all_inside: true
+      min_edge_margin_px: 59.19024065746905
+- name: pos75
+  episode_id: 76
+  source_xy:
+  - 0.4441760848077246
+  - -0.037386270102803015
+  target_xy:
+  - 0.4114642616374534
+  - 0.04536293095591676
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 1
+    tangent_bin: 2
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 2
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 95.15299714594241
+    final:
+      all_inside: true
+      min_edge_margin_px: 94.08124779514588
+- name: pos76
+  episode_id: 77
+  source_xy:
+  - 0.5029483155868709
+  - -0.06650550717121864
+  target_xy:
+  - 0.4781050746043948
+  - 0.08545162437926669
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 4
+    tangent_bin: 2
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 0
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.300000000000605
+    control_steps: 193
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 66.35105630519618
+    final:
+      all_inside: true
+      min_edge_margin_px: 63.932295383471654
+- name: pos77
+  episode_id: 78
+  source_xy:
+  - 0.41206168289810585
+  - -0.07806533834672412
+  target_xy:
+  - 0.48875143923463504
+  - 0.10492440512148452
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 1
+    tangent_bin: 3
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 2
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 19.400000000000727
+    control_steps: 194
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 52.456199764233986
+    final:
+      all_inside: true
+      min_edge_margin_px: 49.74029154063092
+- name: pos78
+  episode_id: 79
+  source_xy:
+  - 0.4859252763724612
+  - -0.08325112760302825
+  target_xy:
+  - 0.49551522032733625
+  - 0.1214057942333829
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 1
+    tangent_bin: 1
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 4
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 19.700000000001094
+    control_steps: 197
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 40.60871530943464
+    final:
+      all_inside: true
+      min_edge_margin_px: 37.66872699087497
+- name: pos79
+  episode_id: 80
+  source_xy:
+  - 0.4850776324445411
+  - -0.09189817324381178
+  target_xy:
+  - 0.4288182100051004
+  - 0.052007538011687754
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 1
+    tangent_bin: 0
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 0
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 19.10000000000036
+    control_steps: 191
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 58.83196085909744
+    final:
+      all_inside: true
+      min_edge_margin_px: 61.405298244438455
+- name: pos80
+  episode_id: 81
+  source_xy:
+  - 0.39746523448503457
+  - -0.08500369363366267
+  target_xy:
+  - 0.4165315915721597
+  - 0.08100422575465105
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 4
+    tangent_bin: 3
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 1
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 72.18468579089905
+    final:
+      all_inside: true
+      min_edge_margin_px: 72.86025835637392
+- name: pos81
+  episode_id: 82
+  source_xy:
+  - 0.407607919154898
+  - -0.02474729662547346
+  target_xy:
+  - 0.4346890545362514
+  - 0.12063086649462748
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 3
+    tangent_bin: 4
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 4
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 18.59999999999975
+    control_steps: 186
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 49.73658910693973
+    final:
+      all_inside: true
+      min_edge_margin_px: 47.22024784906296
+- name: pos82
+  episode_id: 83
+  source_xy:
+  - 0.4024119385062426
+  - -0.07310867696057949
+  target_xy:
+  - 0.4427445514177923
+  - 0.11542759322933008
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 3
+    tangent_bin: 2
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 3
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.200000000000482
+    control_steps: 192
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 51.839280601619066
+    final:
+      all_inside: true
+      min_edge_margin_px: 49.32392530265389
+- name: pos83
+  episode_id: 84
+  source_xy:
+  - 0.4252438982428559
+  - -0.055201053320047266
+  target_xy:
+  - 0.470116141672046
+  - 0.09118930591177864
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 0
+    tangent_bin: 1
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 0
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 63.57094965074111
+    final:
+      all_inside: true
+      min_edge_margin_px: 61.135973508992976
+- name: pos84
+  episode_id: 85
+  source_xy:
+  - 0.42505974844125893
+  - -0.1236352273148182
+  target_xy:
+  - 0.48724095359870356
+  - 0.11611080254164313
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 4
+    tangent_bin: 1
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 3
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 20.100000000001582
+    control_steps: 201
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 45.358510109477294
+    final:
+      all_inside: true
+      min_edge_margin_px: 42.53462978295377
+- name: pos85
+  episode_id: 86
+  source_xy:
+  - 0.489754785363003
+  - -0.07159735766004276
+  target_xy:
+  - 0.4564229114815516
+  - 0.04429803141692404
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 2
+    tangent_bin: 2
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 0
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.10000000000036
+    control_steps: 191
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 71.77606681468022
+    final:
+      all_inside: true
+      min_edge_margin_px: 74.06018865633466
+- name: pos86
+  episode_id: 87
+  source_xy:
+  - 0.44927642903249926
+  - -0.04914756744880693
+  target_xy:
+  - 0.47852987426062865
+  - 0.09334652812807089
+  source_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 0
+    tangent_bin: 2
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 0
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.900000000000116
+    control_steps: 189
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 61.23851216385819
+    final:
+      all_inside: true
+      min_edge_margin_px: 58.727143288805934
+- name: pos87
+  episode_id: 88
+  source_xy:
+  - 0.4481185067701652
+  - -0.11581687126498663
+  target_xy:
+  - 0.47839343982968735
+  - 0.06194219697280001
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 3
+    tangent_bin: 2
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 0
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 19.400000000000727
+    control_steps: 194
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 48.334200086166625
+    final:
+      all_inside: true
+      min_edge_margin_px: 50.92201251200657
+- name: pos88
+  episode_id: 89
+  source_xy:
+  - 0.47724993387005915
+  - -0.06992723234194649
+  target_xy:
+  - 0.4668487769748998
+  - 0.11899994525100419
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 0
+    tangent_bin: 2
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 3
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 19.50000000000085
+    control_steps: 195
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 46.4369064659964
+    final:
+      all_inside: true
+      min_edge_margin_px: 43.73068766070023
+- name: pos89
+  episode_id: 90
+  source_xy:
+  - 0.3981494763805974
+  - -0.07059713812355844
+  target_xy:
+  - 0.40635764120933293
+  - 0.022431804484993656
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 4
+    tangent_bin: 2
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 3
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.499999999999627
+    control_steps: 185
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 80.34934682310364
+    final:
+      all_inside: true
+      min_edge_margin_px: 81.97464762473619
+- name: pos90
+  episode_id: 91
+  source_xy:
+  - 0.45571549209352274
+  - -0.121619666921361
+  target_xy:
+  - 0.40492590731896855
+  - 0.0985798418222059
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 4
+    tangent_bin: 2
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 3
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 19.900000000001338
+    control_steps: 199
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 43.65672869465528
+    final:
+      all_inside: true
+      min_edge_margin_px: 46.34952857707523
+- name: pos91
+  episode_id: 92
+  source_xy:
+  - 0.49155136309597963
+  - -0.11483511472438276
+  target_xy:
+  - 0.4283799493071286
+  - 0.08427037469348539
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 3
+    tangent_bin: 4
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 0
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 19.900000000001338
+    control_steps: 199
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 42.67588472309922
+    final:
+      all_inside: true
+      min_edge_margin_px: 45.55827161996193
+- name: pos92
+  episode_id: 93
+  source_xy:
+  - 0.4679239930372918
+  - -0.10166305970821679
+  target_xy:
+  - 0.4983839677605246
+  - 0.05273087124306561
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 1
+    tangent_bin: 3
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 3
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 19.200000000000482
+    control_steps: 192
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 54.64639783484136
+    final:
+      all_inside: true
+      min_edge_margin_px: 57.214940580652446
+- name: pos93
+  episode_id: 94
+  source_xy:
+  - 0.41560218268068955
+  - -0.11366423414580833
+  target_xy:
+  - 0.44012451531698804
+  - 0.09885694302505454
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 2
+    tangent_bin: 0
+  target_stratum:
+    face: 1
+    face_name: positive_y
+    radial_bin: 0
+    tangent_bin: 3
+  physics_check:
+    success: true
+    duration_seconds: 19.50000000000085
+    control_steps: 195
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 53.746564274631304
+    final:
+      all_inside: true
+      min_edge_margin_px: 56.1160082264116
+- name: pos94
+  episode_id: 95
+  source_xy:
+  - 0.4111488691434683
+  - -0.11961606213788958
+  target_xy:
+  - 0.48509770164504884
+  - 0.05495110242900061
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 3
+    tangent_bin: 0
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 1
+    tangent_bin: 1
+  physics_check:
+    success: true
+    duration_seconds: 19.200000000000482
+    control_steps: 192
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 50.803884239919114
+    final:
+      all_inside: true
+      min_edge_margin_px: 53.20252592876261
+- name: pos95
+  episode_id: 96
+  source_xy:
+  - 0.41730581735519456
+  - -0.04981165065028985
+  target_xy:
+  - 0.4964788587263227
+  - 0.06628619594113436
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 1
+    tangent_bin: 0
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 3
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 18.69999999999987
+    control_steps: 187
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 76.84104446619202
+    final:
+      all_inside: true
+      min_edge_margin_px: 74.69639466464523
+- name: pos96
+  episode_id: 97
+  source_xy:
+  - 0.41633934077046125
+  - -0.09569001956501103
+  target_xy:
+  - 0.49005440004019696
+  - 0.016143586395175998
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 1
+    tangent_bin: 4
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 4
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 18.799999999999994
+    control_steps: 188
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 64.22060399034643
+    final:
+      all_inside: true
+      min_edge_margin_px: 66.42838556548645
+- name: pos97
+  episode_id: 98
+  source_xy:
+  - 0.46017047301489655
+  - -0.11946474413870745
+  target_xy:
+  - 0.44753252643745167
+  - 0.021565124417360283
+  source_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 3
+    tangent_bin: 3
+  target_stratum:
+    face: 3
+    face_name: negative_y
+    radial_bin: 3
+    tangent_bin: 2
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 44.37073624805397
+    final:
+      all_inside: true
+      min_edge_margin_px: 47.07367322601061
+- name: pos98
+  episode_id: 99
+  source_xy:
+  - 0.5038328711237985
+  - -0.026817509049273935
+  target_xy:
+  - 0.4965940897450943
+  - 0.10232780169909306
+  source_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 4
+    tangent_bin: 4
+  target_stratum:
+    face: 0
+    face_name: positive_x
+    radial_bin: 3
+    tangent_bin: 4
+  physics_check:
+    success: true
+    duration_seconds: 19.000000000000238
+    control_steps: 190
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 53.106059324111214
+    final:
+      all_inside: true
+      min_edge_margin_px: 50.36457511829832
+- name: pos99
+  episode_id: 100
+  source_xy:
+  - 0.4052879558810796
+  - -0.028017333715053334
+  target_xy:
+  - 0.41648014522241694
+  - 0.09985028943994456
+  source_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 3
+    tangent_bin: 0
+  target_stratum:
+    face: 2
+    face_name: negative_x
+    radial_bin: 1
+    tangent_bin: 0
+  physics_check:
+    success: true
+    duration_seconds: 18.499999999999627
+    control_steps: 185
+    collision_checks_enabled: false
+    unsafe_contact_count: null
+  visibility:
+    initial:
+      all_inside: true
+      min_edge_margin_px: 64.007961764785
+    final:
+      all_inside: true
+      min_edge_margin_px: 61.79044964003927
+validated_at: '2026-11-12T14:57:41.148061+08:00'
+expert_validation:
+  report: outputs/_checks/insert_plug_v2_collection/layout_preflight/summary.json
+  sha256: 44ed1572d06eb886e52812c035c87fe38b1ebd80c82e126ff0942f4263834dac
+  successes: 100
+  positions: 100
+  duration_limit_s: null
+  actual_duration_range_s:
+  - 18.399999999999505
+  - 20.40000000000195
+  coordinate_or_pairing_changes: 0

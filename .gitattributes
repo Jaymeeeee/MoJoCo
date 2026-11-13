@@ -1,0 +1,5 @@
+outputs/datasets/insert_plug_v2/** -text
+outputs/datasets/insert_plug_v2/**/*.parquet filter=lfs diff=lfs merge=lfs -text
+outputs/datasets/insert_plug_v2/**/*.mp4 filter=lfs diff=lfs merge=lfs -text
+outputs/datasets/insert_plug_v2/positions.pdf filter=lfs diff=lfs merge=lfs -text
+outputs/datasets/insert_plug_v2/positions.csv whitespace=cr-at-eol

@@ -1,0 +1,42 @@
+insert_plug_v2 — MuJoCo RGB-D demonstrations
+
+100 successful demonstrations, 19,072 frames at 10 Hz.
+Robot: Franka FR3 with a Robotiq 2F-85 gripper.
+Task: pick a bolt from its source holder and insert it into the target holder.
+
+Included files
+  lerobot/                 LeRobot v3 training dataset (108 original files)
+  collection_summary.json  Collection provenance and results
+  export_summary.json      Export validation summary
+  positions.csv/.yaml      Frozen source/target position pairs
+  positions.png/.pdf       Position visualization
+  SHA256SUMS               SHA256 of the 114 original included files
+
+The raw bags/ recordings are excluded from this upload. References to bags/
+and absolute local paths in provenance metadata describe the original export;
+they are not required to load the self-contained lerobot/ training dataset.
+The original data and metadata bytes are preserved.
+
+Observations and actions
+  Head and wrist cameras: 256 x 256 RGB-D.
+  RGB: H.264 video.
+  Depth: lossless float32 TIFF bytes embedded in Parquet, measured in metres
+         along the camera optical axis.
+  State: seven arm joint angles in radians and full gripper aperture in metres.
+  Action: eight absolute targets with the same joint/aperture convention.
+  LeRobot episode indices: 0–99; source episode IDs: 1–100.
+  meta/info.json contains the authoritative feature schema and relative paths.
+
+Download large files with Git LFS
+  git lfs install
+  git clone https://github.com/Jaymeeeee/MuJoCo.git
+  cd MuJoCo
+  git lfs pull --include="outputs/datasets/insert_plug_v2/**" --exclude=""
+
+Verify the downloaded dataset on Linux
+  cd outputs/datasets/insert_plug_v2
+  sha256sum -c SHA256SUMS
+
+Parquet, MP4 and the positions PDF are stored using Git LFS. A small text file
+beginning with "version https://git-lfs.github.com/spec/v1" is an LFS pointer;
+run git lfs pull to retrieve its actual data before training.

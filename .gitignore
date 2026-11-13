@@ -2,7 +2,11 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
-/outputs/
+/outputs/*
+!/outputs/datasets/
+/outputs/datasets/*
+!/outputs/datasets/insert_plug_v2/
+/outputs/datasets/insert_plug_v2/bags/
 /data/
 /assets/user/
 /build/

@@ -1,0 +1,30 @@
+{
+  "official_reader_samples_checked": 300,
+  "worst_rgb_mean_absolute_error_255": 1.3981679280598958,
+  "all_depth_pixels_bitwise_equal": true,
+  "depth_frames_checked": 19072,
+  "all_actions_equal_source_float32": true,
+  "all_states_equal_source_float32": true,
+  "all_source_timestamps_exact": true,
+  "all_source_phases_equal": true,
+  "scalar_frames_checked": 19072,
+  "action_float32_conversion_lossless": true,
+  "episodes": 100,
+  "frames": 19072,
+  "fps": 10,
+  "published_reader_samples_checked": 12,
+  "published_reader_indices": [
+    0,
+    192,
+    2089,
+    4005,
+    5907,
+    7834,
+    9722,
+    11626,
+    13529,
+    15433,
+    17354,
+    19071
+  ]
+}
